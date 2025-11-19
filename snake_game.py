@@ -1,6 +1,8 @@
 import pygame
 
-def load_sprites(SCALE):
+SCALE = 3
+
+def load_sprites():
 
     image = pygame.image.load("sprites.png").convert_alpha()
 
@@ -14,7 +16,9 @@ def load_sprites(SCALE):
             sprite = pygame.transform.scale_by(sprite, SCALE)
             sprites.append(sprite)
 
-            if row == 1 and col == 1:
+            if (row == 0 and col == 7) or (row == 1 and col == 7):
+                sprites.append(pygame.transform.flip(sprite, True, False))
+            elif row == 1 and col == 1:
                 sprites.append(pygame.transform.rotate(sprite, 90))
             elif (row == 0 and col < 4) or (row == 1 and col < 5):
 
@@ -24,17 +28,19 @@ def load_sprites(SCALE):
     
     return sprites
 
+def grid(num):
+    return num * 16 * SCALE
+
 def main():
 
-    SCALE = 3
-    width = 160 * SCALE
-    height = 144 * SCALE
+    width = 272 * SCALE
+    height = 304 * SCALE
 
     pygame.init()
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption("Snake Game")
 
-    sprites = load_sprites(SCALE)
+    sprites = load_sprites()
 
     HEAD_N = 0
     HEAD_W = 1
@@ -56,31 +62,68 @@ def main():
     GRASS_1 = 17
     FOOD = 18
     BOX_TL = 19
-    BOX_T = 20
-    BODY_NE = 21
-    BODY_NW = 22
-    BODY_SW = 23
-    BODY_SE = 24
-    BODY_NS = 25
-    BODY_EW = 26
-    TAIL_N = 27
-    TAIL_W = 28
-    TAIL_S = 29
-    TAIL_E = 30
-    TINY_N = 31
-    TINY_W = 32
-    TINY_S = 33
-    TINY_E = 34
-    TINY_EAT_N = 35
-    TINY_EAT_W = 36
-    TINY_EAT_S = 37
-    TINY_EAT_E = 38
-    GRASS_2 = 39
-    BOX_BL = 41
+    BOX_TR = 20
+    BOX_T = 21
+    BODY_NE = 22
+    BODY_NW = 23
+    BODY_SW = 24
+    BODY_SE = 25
+    BODY_NS = 26
+    BODY_EW = 27
+    TAIL_N = 28
+    TAIL_W = 29
+    TAIL_S = 30
+    TAIL_E = 31
+    TINY_N = 32
+    TINY_W = 33
+    TINY_S = 34
+    TINY_E = 35
+    TINY_EAT_N = 36
+    TINY_EAT_W = 37
+    TINY_EAT_S = 38
+    TINY_EAT_E = 39
+    GRASS_2 = 40
+    # EMPTY = 41
+    BOX_BL = 42
+    BOX_BR = 43
+    BOX_B = 44
 
+    def draw_background():
 
-    screen.fill("black")
-    screen.blit(sprites[42], (0, 0))
+        screen.fill(color="black")
+
+        # Drawing box -- row 0 and 1
+        screen.blit(sprites[BOX_TL], (grid(6), 0))
+
+        for i in range (7, 10):
+            screen.blit(sprites[BOX_T], (grid(i), 0))
+
+        screen.blit(sprites[BOX_TR], (grid(10), 0))
+
+        screen.blit(sprites[BOX_BL], (grid(6), grid(1)))
+
+        for i in range (7, 10):
+            screen.blit(sprites[BOX_B], (grid(i), grid(1)))
+
+        screen.blit(sprites[BOX_BR], (grid(10), grid(1)))
+
+        # Drawing grass -- rows 2 through 18
+        for row in range (2, 19):
+            for col in range (17):
+                if row == 2 or row == 18:
+                    screen.blit(sprites[BUSH], (grid(col), grid(row)))
+                elif col == 0 or col == 16:
+                    screen.blit(sprites[BUSH], (grid(col), grid(row)))
+                elif row % 2 == 1:
+                    if col % 2 == 1:
+                        screen.blit(sprites[GRASS_1], (grid(col), grid(row)))
+                    else:
+                        screen.blit(sprites[GRASS_2], (grid(col), grid(row)))
+                else:
+                    if col % 2 == 1:
+                        screen.blit(sprites[GRASS_2], (grid(col), grid(row)))
+                    else:
+                        screen.blit(sprites[GRASS_1], (grid(col), grid(row)))
 
     running = True
 
@@ -89,6 +132,8 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+
+        draw_background()
 
         pygame.display.flip()
 
