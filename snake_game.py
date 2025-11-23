@@ -239,7 +239,7 @@ def main():
             grid_pos = segment.get_grid_pos()
             position = translate(segment.get_grid_pos())
 
-            ahead_direction = snake[i - 1].get_direction()
+            ahead_direction = a_snake[i - 1].get_direction()
             food_pos = food.get_grid_pos()
 
             if direction == NORTH:
@@ -352,7 +352,7 @@ def main():
             body_part = segment.get_body_part()
             position = translate(segment.get_grid_pos())
 
-            ahead_direction = snake[i - 1].get_direction()
+            ahead_direction = a_snake[i - 1].get_direction()
 
             if direction == NORTH:
                 if body_part == HEAD:
@@ -439,7 +439,7 @@ def main():
             body_part = segment.get_body_part()
             position = translate(segment.get_grid_pos())
 
-            ahead_direction = snake[i - 1].get_direction()
+            ahead_direction = a_snake[i - 1].get_direction()
 
             if direction == NORTH:
                 if body_part == HEAD:
