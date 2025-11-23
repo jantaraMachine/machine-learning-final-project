@@ -120,16 +120,6 @@ def main():
 
         old_snake = deepcopy(snake)
 
-        snake_xs = []
-        snake_ys = []
-        for segment in snake:
-
-            grid_pos = segment.get_grid_pos()
-
-            snake_xs.append(grid_pos[0])
-            snake_ys.append(grid_pos[1])
-
-
         food_pos = None
         passed = True
         
