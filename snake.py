@@ -20,7 +20,18 @@ class Snake:
     
     def change_direction(self, direction):
 
+        NORTH = 0
+        WEST = 1
+        SOUTH = 2
+        EAST = 3
+
         if direction is not None:
+
+            if (self.direction == NORTH and direction == SOUTH) or \
+                (self.direction == SOUTH and direction == NORTH) or \
+                (self.direction == WEST and direction == EAST) or \
+                (self.direction == EAST and direction == WEST):
+                return self.direction
 
             prev = self.direction
             self.direction = direction
@@ -29,8 +40,8 @@ class Snake:
         
         return self.direction
 
-    def change_type(self, type):
-        self.type = type
+    def change_body_part(self, body_part):
+        self.body_part = body_part
     
     def move(self):
 
