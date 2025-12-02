@@ -185,7 +185,6 @@ def load_sprites():
 
     return sprites
 
-
 def load_sounds():
 
     start_sound = pygame.mixer.Sound(r"sounds\start.wav")
