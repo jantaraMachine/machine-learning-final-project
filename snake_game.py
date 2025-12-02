@@ -57,10 +57,60 @@ TINY_DEAD_W = 45
 TINY_DEAD_S = 46
 TINY_DEAD_E = 47
 GRASS_2 = 48
-GRASS = 49 # Not actually a sprite but is a variable used in the tiles list
+ICON = 49
 BOX_BL = 50
 BOX_BR = 51
 BOX_B = 52
+INSTRUCTIONS_1 = 53
+INSTRUCTIONS_2 = 54
+INSTRUCTIONS_3 = 55
+INSTRUCTIONS_4 = 56
+INSTRUCTIONS_5 = 57
+INSTRUCTIONS_6 = 58
+ZERO = 59
+ONE = 60
+EIGHT = 61
+NINE = 62
+TWO = 63
+THREE = 64
+SCORE_1 = 65
+SCORE_2 = 66
+FOUR = 67
+FIVE = 68
+SCORE_3 = 69
+# 70
+SIX = 71
+SEVEN = 72
+# 73
+# 74
+GAME_OVER_1 = 75
+GAME_OVER_2 = 76
+YOU_WIN_1 = 77
+YOU_WIN_2 = 78
+HAPPY_N = 79
+HAPPY_W = 80
+HAPPY_S = 81
+HAPPY_E = 82
+BONK_NE = 83 # HEAD N, BODY from E
+BONK_NW = 84 # HEAD N, BODY from W
+BONK_WN = 85 # HEAD W, BODY from N
+BONK_EN = 86 # HEAD E, BODY from N
+BONK_ES = 87 # HEAD E, BODY from S
+BONK_WS = 88 # HEAD W, BODY from S
+BONK_SW = 89 # HEAD S, BODY from W
+BONK_SE = 90 # HEAD S, BODY from E
+# BONK_SW = 91 | repeat
+DEAD_NE = 92
+DEAD_NW = 93
+DEAD_WN = 94
+DEAD_EN = 95
+DEAD_ES = 96
+DEAD_WS = 97
+DEAD_SW = 98
+DEAD_SE = 99
+# DEAD_SW = 100 | repeat
+PAUSED_1 = 101
+PAUSED_2 = 102
 
 NORTH = 0
 WEST = 1
@@ -72,6 +122,8 @@ BODY = 1
 TAIL = 2
 TINY = 3
 
+GRASS = 0
+
 # Loads all of the sprites in sprites.png
 def load_sprites():
 
@@ -80,47 +132,90 @@ def load_sprites():
     sprites = []
 
     # Iterates through rows and columns of sprites.png
-    for row in range (2):
+    for row in range (4):
         for col in range (10):
 
             sprite = pygame.Surface((16, 16), pygame.SRCALPHA)
             sprite.blit(image, (0, 0), (col * 16, row * 16, 16, 16))
-            sprite = pygame.transform.scale_by(sprite, SCALE)
-            sprites.append(sprite)
+            
+            if row == 2:
 
-            # Adds flipped versions of text box corners (BOX_TL, BOX_TR, BOX_BL, BOX_BR) to sprites list
-            if (row == 0 and col == 8) or (row == 1 and col == 8):
-                sprites.append(pygame.transform.flip(sprite, True, False))
-            # Adds 90 degree rotated snake body (BODY_NS, BODY_WE) to sprites list
-            elif row == 1 and col == 1:
-                sprites.append(pygame.transform.rotate(sprite, 90))
-            # Adds fully rotated parts of the snake (so they can face all four directions) to sprites list
-            # Includes, HEAD, TINY, BODY (corners), BONK, DEAD, and TAIL
-            elif (row == 0 and col < 5) or (row == 1 and col < 6):
-                # Unrotated = NORTH
-                sprites.append(pygame.transform.rotate(sprite, 90)) # WEST
-                sprites.append(pygame.transform.rotate(sprite, 180)) # SOUTH
-                sprites.append(pygame.transform.rotate(sprite, 270)) # EAST
-    
+                if col < 6:
+                    sprite = pygame.transform.scale_by(sprite, SCALE)
+                    sprites.append(sprite)
+                else:
+                    for r in range(2):
+                        for c in range(2):
+                            small_sprite = pygame.Surface((8, 8), pygame.SRCALPHA)
+                            small_sprite.blit(sprite, (0, 0), (c * 8, r * 8, 8, 8))
+                            small_sprite = pygame.transform.scale_by(small_sprite, SCALE)
+                            sprites.append(small_sprite)
+            else:
+                sprite = pygame.transform.scale_by(sprite, SCALE)
+                sprites.append(sprite)
+
+                if row < 2:
+                    # Adds flipped versions of text box corners (BOX_TL, BOX_TR, BOX_BL, BOX_BR) to sprites list
+                    if (row == 0 and col == 8) or (row == 1 and col == 8):
+                        sprites.append(pygame.transform.flip(sprite, True, False))
+                    # Adds 90 degree rotated snake body (BODY_NS, BODY_WE) to sprites list
+                    elif row == 1 and col == 1:
+                        sprites.append(pygame.transform.rotate(sprite, 90))
+                    # Adds fully rotated parts of the snake (so they can face all four directions) to sprites list
+                    # Includes, HEAD, TINY, BODY (corners), BONK, DEAD, and TAIL
+                    elif (row == 0 and col < 5) or (row == 1 and col < 6):
+                        # Unrotated = NORTH
+                        for i in range(1, 4):
+                            sprites.append(pygame.transform.rotate(sprite, 90 * i))
+                elif row == 3:
+                    if col == 4:
+                        # Unrotated = NORTH
+                        for i in range(1, 4):
+                            sprites.append(pygame.transform.rotate(sprite, 90 * i))
+                    elif col > 4 and col < 7:
+
+                        current_sprite = sprite
+
+                        for i in range(1, 5):
+
+                            sprites.append(pygame.transform.flip(current_sprite, True, False))
+                            rotated = pygame.transform.rotate(current_sprite, 90 * i)
+                            sprites.append(rotated)
+                            current_sprite = rotated
+
     return sprites
+
+
+def load_sounds():
+
+    start_sound = pygame.mixer.Sound(r"sounds\start.wav")
+    eat = pygame.mixer.Sound(r"sounds\eat.wav")
+    hit = pygame.mixer.Sound(r"sounds\hit.wav")
+    loser = pygame.mixer.Sound(r"sounds\loser.wav")
+    winner = pygame.mixer.Sound(r"sounds\winner.wav")
+
+    return start_sound, eat, hit, loser, winner
 
 # Converts a position on the grid (screen's grid is 17x19) to its appropriate xy-coordinates
 # Each sprite is as big as a tile on the grid for reference
 # EX: If SCALE = 3, (7, 8) on the screen's grid is (336, 384) in xy-coordinates
-def grid(xy_pos):
+def grid(grid_pos):
     # Multiply number by 16 (width of unscaled sprite) times SCALE
-    return xy_pos * 16 * SCALE
+    return grid_pos * 16 * SCALE
+
+def micro_grid(micro_grid_pos):
+    return micro_grid_pos * 8 * SCALE
 
 # A different conversion function that converts a position on the map's grid
 # (the grid that the snake traverses on, a 17x17 grid) to its appropriate
 # xy-coordinates
 # EX: If SCALE = 3, (7, 8) on the map's grid is (336, 480) -- shifted down by 2
 # tiles
-def map(grid_pos):
-    return [grid(grid_pos[0]), grid(2) + grid(grid_pos[1])]
+def map(map_pos):
+    return [grid(map_pos[0]), grid(2) + grid(map_pos[1])]
 
 # Initializes snake, old_snake, and food variables
-def init():
+def init(sound):
 
     # Snake object takes in starting position, starting direction it's going in, and the body type
     # that it is (in this case, snake's head start off as TINY but will change to HEAD as it gains
@@ -136,7 +231,9 @@ def init():
     
     # Looks for a random starting position that doesn't intersect with the snake's position
     while(True):
+
         passed = True
+        
         # Finds random coordinates on grass portion of map
         food_pos = [randint(1, 15), randint(1, 15)]
         # Iterates through all snake segments to verify that food_pos is not the same
@@ -145,10 +242,10 @@ def init():
             if food_pos == segment.get_map_pos():
                 passed = False
         if passed == True:
-            return snake, old_snake, Food(food_pos)
+            return snake, old_snake, Food(food_pos, sound)
 
 # Updates the snake's and food's position depending on several factors
-def update_snake(snake, food, tick, current_direction, tiles, alive):
+def update_snake(snake, food, tick, current_direction, tiles, alive, score, dead_head_direction):
 
     # Moves and updates snake's segments' directions only after 12 ticks
     # (time units, can change ticks to make snake move faster or slower)
@@ -164,14 +261,11 @@ def update_snake(snake, food, tick, current_direction, tiles, alive):
                 segment.move()
                 # Get the current map position of the snake's head
                 head_map_pos = segment.get_map_pos()
+                # Get the direction that the head (and the player) is going
+                head_direction = segment.get_direction()
 
                 # If the head is in the same spot as the food, eat the food
                 if head_map_pos == food.get_map_pos():
-
-                    food.eat(snake) # Food will be teleported somewhere else
-
-                    # Get the direction that the head (and the player) is going
-                    head_direction = segment.get_direction()
 
                     # If the snake only has one segment, change the head from TINY to HEAD and add a TAIL behind the head
                     if len(snake) == 1:
@@ -197,10 +291,15 @@ def update_snake(snake, food, tick, current_direction, tiles, alive):
                             snake.insert(1, Snake([head_map_pos[0], head_map_pos[1] - 1], prev, BODY))
                         else:
                             snake.insert(1, Snake([head_map_pos[0] - 1, head_map_pos[1]], prev, BODY))
+                        
+                    food.eat(snake) # Food will be teleported somewhere else
+                    score += 1
+
                     break
                 # If the head is in the same spot as a BUSH (aka the wall), kill the snake and quit the loop
                 elif tiles[head_map_pos[0]][head_map_pos[1]] == BUSH:
                     alive = False
+                    dead_head_direction = head_direction
                     break
                 # If the head is in the same spot as any of its other segments, kill the snake and quit the loop
                 else:
@@ -208,21 +307,51 @@ def update_snake(snake, food, tick, current_direction, tiles, alive):
                         if j != 0:
                             if head_map_pos == seg.get_map_pos():
                                 alive = False
+                                dead_head_direction = head_direction
                                 break
             # Otherwise, move all of the snake's segments according to how the previous segment has moved
             else:
                 prev = segment.change_direction(prev)
                 segment.move()
         # Return whether the snake is alive or not and reset ticks to 0 (the snake has moved)
-        return alive, 0
+        return alive, 0, score, dead_head_direction
     else:
         # Return that the snake is alive and add 1 tick (the snake has not moved)
-        return alive, tick + 1
+        return alive, tick + 1, score, dead_head_direction
+
+def get_digit_sprite(digit):
+
+    if digit == 0:
+        return ZERO
+    elif digit == 1:
+        return ONE
+    elif digit == 2:
+        return TWO
+    elif digit == 3:
+        return THREE
+    elif digit == 4:
+        return FOUR
+    elif digit == 5:
+        return FIVE
+    elif digit == 6:
+        return SIX
+    elif digit == 7:
+        return SEVEN
+    elif digit == 8:
+        return EIGHT
+    return NINE
 
 # Draws the sprites for the background
-def draw_background(screen, sprites):
+def draw_background(screen, sprites, score, alive, pause, won):
 
     screen.fill(color="black")
+
+    screen.blit(sprites[INSTRUCTIONS_1], (0, 0))
+    screen.blit(sprites[INSTRUCTIONS_2], (grid(1), 0))
+    screen.blit(sprites[INSTRUCTIONS_3], (grid(2), 0))
+    screen.blit(sprites[INSTRUCTIONS_4], (grid(3), 0))
+    screen.blit(sprites[INSTRUCTIONS_5], (grid(2), grid(1)))
+    screen.blit(sprites[INSTRUCTIONS_6], (grid(3), grid(1)))
 
     # Drawing box -- row 0 and 1
     screen.blit(sprites[BOX_TL], (grid(6), 0))
@@ -239,6 +368,46 @@ def draw_background(screen, sprites):
 
     screen.blit(sprites[BOX_BR], (grid(10), grid(1)))
 
+    screen.blit(sprites[SCORE_1], (micro_grid(13), grid(1)))
+    screen.blit(sprites[SCORE_2], (micro_grid(14), grid(1)))
+    screen.blit(sprites[SCORE_3], (micro_grid(15), grid(1)))
+
+    digits = [int(digit) for digit in str(score)]
+    
+    ones = None
+    tens = None
+    hundreds = None
+
+    if score < 10:
+        ones = digits[0]
+    elif score < 100:
+        ones = digits[1]
+        tens = digits[0]
+    else:
+        ones = digits[2]
+        tens = digits[1]
+        hundreds = digits[0]
+    
+    screen.blit(sprites[get_digit_sprite(ones)], (micro_grid(18), grid(1)))
+    
+    if tens is not None:
+        screen.blit(sprites[get_digit_sprite(tens)], (micro_grid(17), grid(1)))
+    
+    if hundreds is not None:
+        screen.blit(sprites[get_digit_sprite(hundreds)], (micro_grid(16), grid(1)))
+    
+    if not alive:
+        screen.blit(sprites[GAME_OVER_1], (micro_grid(15), 0))
+        screen.blit(sprites[GAME_OVER_2], (micro_grid(17), 0))
+    
+    if pause:
+        screen.blit(sprites[PAUSED_1], (micro_grid(15), 0))
+        screen.blit(sprites[PAUSED_2], (micro_grid(17), 0))
+    
+    if won:
+        screen.blit(sprites[YOU_WIN_1], (micro_grid(15), 0))
+        screen.blit(sprites[YOU_WIN_2], (micro_grid(17), 0))
+        
     # Drawing grass -- rows 2 through 18
     for row in range (2, 19):
         for col in range (17):
@@ -387,8 +556,7 @@ def draw_snake(screen, sprites, snake, food):
 # Draws the sprites for the first part of the death animation --
 # replaces the HEAD with a BONK sprite.
 # Follows the same logic as draw_snake() without food logic
-def dead_1(screen, sprites, a_snake):
-
+def dead_1(screen, sprites, a_snake, dead_head_direction):
     for i, segment in enumerate(a_snake):
 
         direction = segment.get_direction()
@@ -397,88 +565,109 @@ def dead_1(screen, sprites, a_snake):
 
         ahead_direction = a_snake[i - 1].get_direction()
 
-        if direction == NORTH:
-            if body_part == HEAD:
-                screen.blit(sprites[BONK_N], (position[0], position[1]))
-            elif body_part == BODY:
-                if ahead_direction == NORTH:
-                    screen.blit(sprites[BODY_NS], (position[0], position[1]))
-                elif ahead_direction == WEST:
-                    screen.blit(sprites[BODY_SW], (position[0], position[1]))
-                else:
-                    screen.blit(sprites[BODY_SE], (position[0], position[1]))
-            elif body_part == TAIL:
-
-                if ahead_direction == NORTH:
-                    screen.blit(sprites[TAIL_N], (position[0], position[1]))
-                elif ahead_direction == WEST:
-                    screen.blit(sprites[TAIL_W], (position[0], position[1]))
-                else:
-                    screen.blit(sprites[TAIL_E], (position[0], position[1]))
-            else:
+        if body_part == TINY:
+            if dead_head_direction == NORTH:
                 screen.blit(sprites[TINY_BONK_N], (position[0], position[1]))
-        elif direction == WEST:
-            if body_part == HEAD:
-                screen.blit(sprites[BONK_W], (position[0], position[1]))
-            elif body_part == BODY:
-                if ahead_direction == NORTH:
-                    screen.blit(sprites[BODY_NE], (position[0], position[1]))
-                elif ahead_direction == WEST:
-                    screen.blit(sprites[BODY_WE], (position[0], position[1]))
-                else:
-                    screen.blit(sprites[BODY_SE], (position[0], position[1]))
-            elif body_part == TAIL:
-                if ahead_direction == NORTH:
-                    screen.blit(sprites[TAIL_N], (position[0], position[1]))
-                elif ahead_direction == WEST:
-                    screen.blit(sprites[TAIL_W], (position[0], position[1]))
-                else:
-                    screen.blit(sprites[TAIL_S], (position[0], position[1]))
-            else:
+            elif dead_head_direction == WEST:
                 screen.blit(sprites[TINY_BONK_W], (position[0], position[1]))
-        elif direction == SOUTH:
-            if body_part == HEAD:
-                screen.blit(sprites[BONK_S], (position[0], position[1]))
-            elif body_part == BODY:
-                if ahead_direction == WEST:
-                    screen.blit(sprites[BODY_NW], (position[0], position[1]))
-                elif ahead_direction == SOUTH:
-                    screen.blit(sprites[BODY_NS], (position[0], position[1]))
-                else:
-                    screen.blit(sprites[BODY_NE], (position[0], position[1]))
-            elif body_part == TAIL:
-                if ahead_direction == WEST:
-                    screen.blit(sprites[TAIL_W], (position[0], position[1]))
-                elif ahead_direction == SOUTH:
-                    screen.blit(sprites[TAIL_S], (position[0], position[1]))
-                else:
-                    screen.blit(sprites[TAIL_E], (position[0], position[1]))
-            else:
+            elif dead_head_direction == SOUTH:
                 screen.blit(sprites[TINY_BONK_S], (position[0], position[1]))
-        else:
-            if body_part == HEAD:
-                screen.blit(sprites[BONK_E], (position[0], position[1]))
-            elif body_part == BODY:
-                if ahead_direction == NORTH:
-                    screen.blit(sprites[BODY_NW], (position[0], position[1]))
-                elif ahead_direction == SOUTH:
-                    screen.blit(sprites[BODY_SW], (position[0], position[1]))
-                else:
-                    screen.blit(sprites[BODY_WE], (position[0], position[1]))
-            elif body_part == TAIL:
-                if ahead_direction == NORTH:
-                    screen.blit(sprites[TAIL_N], (position[0], position[1]))
-                elif ahead_direction == SOUTH:
-                    screen.blit(sprites[TAIL_S], (position[0], position[1]))
-                else:
-                    screen.blit(sprites[TAIL_E], (position[0], position[1]))
             else:
                 screen.blit(sprites[TINY_BONK_E], (position[0], position[1]))
+        else:
+            if direction == NORTH:
+                if body_part == HEAD:
+                    if dead_head_direction == NORTH:
+                        screen.blit(sprites[BONK_N], (position[0], position[1]))
+                    elif dead_head_direction == WEST:
+                        screen.blit(sprites[BONK_WS], (position[0], position[1]))
+                    else:
+                        screen.blit(sprites[BONK_ES], (position[0], position[1]))
+                elif body_part == BODY:
+                    if ahead_direction == NORTH:
+                        screen.blit(sprites[BODY_NS], (position[0], position[1]))
+                    elif ahead_direction == WEST:
+                        screen.blit(sprites[BODY_SW], (position[0], position[1]))
+                    else:
+                        screen.blit(sprites[BODY_SE], (position[0], position[1]))
+                else:
+                    if ahead_direction == NORTH:
+                        screen.blit(sprites[TAIL_N], (position[0], position[1]))
+                    elif ahead_direction == WEST:
+                        screen.blit(sprites[TAIL_W], (position[0], position[1]))
+                    else:
+                        screen.blit(sprites[TAIL_E], (position[0], position[1]))
+            elif direction == WEST:
+                if body_part == HEAD:
+                    if dead_head_direction == NORTH:
+                        screen.blit(sprites[BONK_NE], (position[0], position[1]))
+                    elif dead_head_direction == WEST:
+                        screen.blit(sprites[BONK_W], (position[0], position[1]))
+                    else:
+                        screen.blit(sprites[BONK_SE], (position[0], position[1]))
+                elif body_part == BODY:
+                    if ahead_direction == NORTH:
+                        screen.blit(sprites[BODY_NE], (position[0], position[1]))
+                    elif ahead_direction == WEST:
+                        screen.blit(sprites[BODY_WE], (position[0], position[1]))
+                    else:
+                        screen.blit(sprites[BODY_SE], (position[0], position[1]))
+                else:
+                    if ahead_direction == NORTH:
+                        screen.blit(sprites[TAIL_N], (position[0], position[1]))
+                    elif ahead_direction == WEST:
+                        screen.blit(sprites[TAIL_W], (position[0], position[1]))
+                    else:
+                        screen.blit(sprites[TAIL_S], (position[0], position[1]))
+            elif direction == SOUTH:
+                if body_part == HEAD:
+                    if dead_head_direction == WEST:
+                        screen.blit(sprites[BONK_WN], (position[0], position[1]))
+                    elif dead_head_direction == SOUTH:
+                        screen.blit(sprites[BONK_S], (position[0], position[1]))
+                    else:
+                        screen.blit(sprites[BONK_EN], (position[0], position[1]))
+                elif body_part == BODY:
+                    if ahead_direction == WEST:
+                        screen.blit(sprites[BODY_NW], (position[0], position[1]))
+                    elif ahead_direction == SOUTH:
+                        screen.blit(sprites[BODY_NS], (position[0], position[1]))
+                    else:
+                        screen.blit(sprites[BODY_NE], (position[0], position[1]))
+                else:
+                    if ahead_direction == WEST:
+                        screen.blit(sprites[TAIL_W], (position[0], position[1]))
+                    elif ahead_direction == SOUTH:
+                        screen.blit(sprites[TAIL_S], (position[0], position[1]))
+                    else:
+                        screen.blit(sprites[TAIL_E], (position[0], position[1]))
+            else:
+                if body_part == HEAD:
+                    if dead_head_direction == NORTH:
+                        screen.blit(sprites[BONK_NW], (position[0], position[1]))
+                    elif dead_head_direction == SOUTH:
+                        screen.blit(sprites[BONK_SW], (position[0], position[1]))
+                    else:
+                        screen.blit(sprites[BONK_E], (position[0], position[1]))
+                elif body_part == BODY:
+                    if ahead_direction == NORTH:
+                        screen.blit(sprites[BODY_NW], (position[0], position[1]))
+                    elif ahead_direction == SOUTH:
+                        screen.blit(sprites[BODY_SW], (position[0], position[1]))
+                    else:
+                        screen.blit(sprites[BODY_WE], (position[0], position[1]))
+                else:
+                    if ahead_direction == NORTH:
+                        screen.blit(sprites[TAIL_N], (position[0], position[1]))
+                    elif ahead_direction == SOUTH:
+                        screen.blit(sprites[TAIL_S], (position[0], position[1]))
+                    else:
+                        screen.blit(sprites[TAIL_E], (position[0], position[1]))
 
 # Draws the sprites for the second part of the death animation --
 # replaces the HEAD with a DEAD sprite.
 # Follows the same logic as dead_1()
-def dead_2(screen, sprites, a_snake):
+def dead_2(screen, sprites, a_snake, dead_head_direction):
     for i, segment in enumerate(a_snake):
 
         direction = segment.get_direction()
@@ -487,9 +676,129 @@ def dead_2(screen, sprites, a_snake):
 
         ahead_direction = a_snake[i - 1].get_direction()
 
+        if body_part == TINY:
+            if dead_head_direction == NORTH:
+                screen.blit(sprites[TINY_DEAD_N], (position[0], position[1]))
+            elif dead_head_direction == WEST:
+                screen.blit(sprites[TINY_DEAD_W], (position[0], position[1]))
+            elif dead_head_direction == SOUTH:
+                screen.blit(sprites[TINY_DEAD_S], (position[0], position[1]))
+            else:
+                screen.blit(sprites[TINY_DEAD_E], (position[0], position[1]))
+        else:
+            if direction == NORTH:
+                if body_part == HEAD:
+                    if dead_head_direction == NORTH:
+                        screen.blit(sprites[DEAD_N], (position[0], position[1]))
+                    elif dead_head_direction == WEST:
+                        screen.blit(sprites[DEAD_WS], (position[0], position[1]))
+                    else:
+                        screen.blit(sprites[DEAD_ES], (position[0], position[1]))
+                elif body_part == BODY:
+                    if ahead_direction == NORTH:
+                        screen.blit(sprites[BODY_NS], (position[0], position[1]))
+                    elif ahead_direction == WEST:
+                        screen.blit(sprites[BODY_SW], (position[0], position[1]))
+                    else:
+                        screen.blit(sprites[BODY_SE], (position[0], position[1]))
+                else:
+                    if ahead_direction == NORTH:
+                        screen.blit(sprites[TAIL_N], (position[0], position[1]))
+                    elif ahead_direction == WEST:
+                        screen.blit(sprites[TAIL_W], (position[0], position[1]))
+                    else:
+                        screen.blit(sprites[TAIL_E], (position[0], position[1]))
+            elif direction == WEST:
+                if body_part == HEAD:
+                    if dead_head_direction == NORTH:
+                        screen.blit(sprites[DEAD_NE], (position[0], position[1]))
+                    elif dead_head_direction == WEST:
+                        screen.blit(sprites[DEAD_W], (position[0], position[1]))
+                    else:
+                        screen.blit(sprites[DEAD_SE], (position[0], position[1]))
+                elif body_part == BODY:
+                    if ahead_direction == NORTH:
+                        screen.blit(sprites[BODY_NE], (position[0], position[1]))
+                    elif ahead_direction == WEST:
+                        screen.blit(sprites[BODY_WE], (position[0], position[1]))
+                    else:
+                        screen.blit(sprites[BODY_SE], (position[0], position[1]))
+                else:
+                    if ahead_direction == NORTH:
+                        screen.blit(sprites[TAIL_N], (position[0], position[1]))
+                    elif ahead_direction == WEST:
+                        screen.blit(sprites[TAIL_W], (position[0], position[1]))
+                    else:
+                        screen.blit(sprites[TAIL_S], (position[0], position[1]))
+            elif direction == SOUTH:
+                if body_part == HEAD:
+                    if dead_head_direction == WEST:
+                        screen.blit(sprites[DEAD_WN], (position[0], position[1]))
+                    elif dead_head_direction == SOUTH:
+                        screen.blit(sprites[DEAD_S], (position[0], position[1]))
+                    else:
+                        screen.blit(sprites[DEAD_EN], (position[0], position[1]))
+                elif body_part == BODY:
+                    if ahead_direction == WEST:
+                        screen.blit(sprites[BODY_NW], (position[0], position[1]))
+                    elif ahead_direction == SOUTH:
+                        screen.blit(sprites[BODY_NS], (position[0], position[1]))
+                    else:
+                        screen.blit(sprites[BODY_NE], (position[0], position[1]))
+                else:
+                    if ahead_direction == WEST:
+                        screen.blit(sprites[TAIL_W], (position[0], position[1]))
+                    elif ahead_direction == SOUTH:
+                        screen.blit(sprites[TAIL_S], (position[0], position[1]))
+                    else:
+                        screen.blit(sprites[TAIL_E], (position[0], position[1]))
+            else:
+                if body_part == HEAD:
+                    if dead_head_direction == NORTH:
+                        screen.blit(sprites[DEAD_NW], (position[0], position[1]))
+                    elif dead_head_direction == SOUTH:
+                        screen.blit(sprites[DEAD_SW], (position[0], position[1]))
+                    else:
+                        screen.blit(sprites[DEAD_E], (position[0], position[1]))
+                elif body_part == BODY:
+                    if ahead_direction == NORTH:
+                        screen.blit(sprites[BODY_NW], (position[0], position[1]))
+                    elif ahead_direction == SOUTH:
+                        screen.blit(sprites[BODY_SW], (position[0], position[1]))
+                    else:
+                        screen.blit(sprites[BODY_WE], (position[0], position[1]))
+                else:
+                    if ahead_direction == NORTH:
+                        screen.blit(sprites[TAIL_N], (position[0], position[1]))
+                    elif ahead_direction == SOUTH:
+                        screen.blit(sprites[TAIL_S], (position[0], position[1]))
+                    else:
+                        screen.blit(sprites[TAIL_E], (position[0], position[1]))
+
+# Draws the happy winning snake
+def win(screen, sprites, a_snake):
+    for i, segment in enumerate(a_snake):
+
+        # Get all its data points (direction, body_part, grid_pos)
+        direction = segment.get_direction()
+        body_part = segment.get_body_part()
+        map_pos = segment.get_map_pos()
+        position = map(map_pos) # Convert from map position
+
+        # Get the direction of the segment ahead of the current segment to use
+        # for proper sprite drawing (specifically for corners)
+        ahead_direction = a_snake[i - 1].get_direction()
+
+        # Draw the correct sprite for each segment depending on what body type
+        # it is, what direction it's going in, and if its body type is BODY,
+        # whether to draw a corner sprite and if so, which one -- this depends
+        # on the direction of the segment ahead of it.
+        # Also draws the EAT sprite if the HEAD is one tile behind of the food in
+        # each of the cardinal directions (no implemented sprite if food is diagonal
+        # from HEAD).
         if direction == NORTH:
             if body_part == HEAD:
-                screen.blit(sprites[DEAD_N], (position[0], position[1]))
+                screen.blit(sprites[HAPPY_N], (position[0], position[1]))
             elif body_part == BODY:
                 if ahead_direction == NORTH:
                     screen.blit(sprites[BODY_NS], (position[0], position[1]))
@@ -497,7 +806,7 @@ def dead_2(screen, sprites, a_snake):
                     screen.blit(sprites[BODY_SW], (position[0], position[1]))
                 else:
                     screen.blit(sprites[BODY_SE], (position[0], position[1]))
-            elif body_part == TAIL:
+            else:
 
                 if ahead_direction == NORTH:
                     screen.blit(sprites[TAIL_N], (position[0], position[1]))
@@ -505,11 +814,9 @@ def dead_2(screen, sprites, a_snake):
                     screen.blit(sprites[TAIL_W], (position[0], position[1]))
                 else:
                     screen.blit(sprites[TAIL_E], (position[0], position[1]))
-            else:
-                screen.blit(sprites[TINY_DEAD_N], (position[0], position[1]))
         elif direction == WEST:
             if body_part == HEAD:
-                screen.blit(sprites[DEAD_W], (position[0], position[1]))
+                screen.blit(sprites[HAPPY_W], (position[0], position[1]))
             elif body_part == BODY:
                 if ahead_direction == NORTH:
                     screen.blit(sprites[BODY_NE], (position[0], position[1]))
@@ -517,18 +824,16 @@ def dead_2(screen, sprites, a_snake):
                     screen.blit(sprites[BODY_WE], (position[0], position[1]))
                 else:
                     screen.blit(sprites[BODY_SE], (position[0], position[1]))
-            elif body_part == TAIL:
+            else:
                 if ahead_direction == NORTH:
                     screen.blit(sprites[TAIL_N], (position[0], position[1]))
                 elif ahead_direction == WEST:
                     screen.blit(sprites[TAIL_W], (position[0], position[1]))
                 else:
                     screen.blit(sprites[TAIL_S], (position[0], position[1]))
-            else:
-                screen.blit(sprites[TINY_DEAD_W], (position[0], position[1]))
         elif direction == SOUTH:
             if body_part == HEAD:
-                screen.blit(sprites[DEAD_S], (position[0], position[1]))
+                screen.blit(sprites[HAPPY_S], (position[0], position[1]))
             elif body_part == BODY:
                 if ahead_direction == WEST:
                     screen.blit(sprites[BODY_NW], (position[0], position[1]))
@@ -536,18 +841,16 @@ def dead_2(screen, sprites, a_snake):
                     screen.blit(sprites[BODY_NS], (position[0], position[1]))
                 else:
                     screen.blit(sprites[BODY_NE], (position[0], position[1]))
-            elif body_part == TAIL:
+            else:
                 if ahead_direction == WEST:
                     screen.blit(sprites[TAIL_W], (position[0], position[1]))
                 elif ahead_direction == SOUTH:
                     screen.blit(sprites[TAIL_S], (position[0], position[1]))
                 else:
                     screen.blit(sprites[TAIL_E], (position[0], position[1]))
-            else:
-                screen.blit(sprites[TINY_DEAD_S], (position[0], position[1]))
         else:
             if body_part == HEAD:
-                screen.blit(sprites[DEAD_E], (position[0], position[1]))
+                screen.blit(sprites[HAPPY_E], (position[0], position[1]))
             elif body_part == BODY:
                 if ahead_direction == NORTH:
                     screen.blit(sprites[BODY_NW], (position[0], position[1]))
@@ -555,15 +858,13 @@ def dead_2(screen, sprites, a_snake):
                     screen.blit(sprites[BODY_SW], (position[0], position[1]))
                 else:
                     screen.blit(sprites[BODY_WE], (position[0], position[1]))
-            elif body_part == TAIL:
+            else:
                 if ahead_direction == NORTH:
                     screen.blit(sprites[TAIL_N], (position[0], position[1]))
                 elif ahead_direction == SOUTH:
                     screen.blit(sprites[TAIL_S], (position[0], position[1]))
                 else:
                     screen.blit(sprites[TAIL_E], (position[0], position[1]))
-            else:
-                screen.blit(sprites[TINY_DEAD_E], (position[0], position[1]))
 
 # Draws the food depending on its position
 def draw_food(screen, sprites, food):
@@ -582,6 +883,9 @@ def main():
     pygame.display.set_caption("Snake Game")
 
     sprites = load_sprites()
+    start_sound, eat, hit, loser, winner = load_sounds()
+
+    pygame.display.set_icon(sprites[ICON])
 
     # Specifies what kind of tile each map tile is -- used for collision
     tiles = [
@@ -604,7 +908,7 @@ def main():
         [BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH]
     ]
 
-    snake, old_snake, food = init()
+    snake, old_snake, food = init(eat)
 
     alive = True
 
@@ -613,6 +917,12 @@ def main():
     current_direction = None
     clock = pygame.time.Clock()
     did_death_animation = 0
+    score = 0
+    pause = False
+    dead_head_direction = None
+    won = False
+    start = True
+    play_win_sound = True
     # ----------------------------------------------------------
 
     # Game loop
@@ -636,28 +946,61 @@ def main():
                     current_direction = SOUTH
                 elif event.key == pygame.K_RIGHT:
                     current_direction = EAST
+                elif event.key == pygame.K_SPACE:
+                    if not alive or won:
+                        alive = True
+                        snake, old_snake, food = init(eat)
+                        did_death_animation = 0
+                        current_direction = NORTH
+                        won = False
+                        score = 0
+                        start = True
+                        play_win_sound = True
+                    elif pause:
+                        pause = False
+                    else:
+                        pause = True
         # Updates the snake's current condition + living status + tick count if alive
-        if alive:
-            alive, tick = update_snake(snake, food, tick, current_direction, tiles, alive)
+        if alive and not pause and not won:
+            alive, tick, score, dead_head_direction = update_snake(snake, food, tick, current_direction, tiles, alive, score, dead_head_direction)
 
-        draw_background(screen, sprites)
+        draw_background(screen, sprites, score, alive, pause, won)
 
-        # Draws snake normally if alive
-        if alive:
-            draw_snake(screen, sprites, snake, food)
-            if tick == 0: # Updates old_snake to be current snake after it moves
-                old_snake = deepcopy(snake)
-        # Draws death animation if snake is dead
-        else:
-            # dead_1 for 100 frames
-            if did_death_animation < 100:
-                dead_1(screen, sprites, old_snake)
-                did_death_animation += 1
-            # dead_2 for remainder
+        if score == 225:
+            won = True
+
+        if not won:
+            # Draws snake normally if alive
+            if alive:
+                draw_snake(screen, sprites, snake, food)
+                if tick == 0: # Updates old_snake to be current snake after it moves
+                    old_snake = deepcopy(snake)
+            # Draws death animation if snake is dead
             else:
-                dead_2(screen, sprites, old_snake)
-        
-        draw_food(screen, sprites, food)
+                
+                # dead_1 for 100 frames
+                if did_death_animation < 100:
+                    if did_death_animation == 0:
+                        hit.play()
+                    dead_1(screen, sprites, old_snake, dead_head_direction)
+                    did_death_animation += 1
+                # dead_2 for remainder
+                else:
+                    if did_death_animation == 100:
+                        loser.play()
+                        did_death_animation += 1
+                    dead_2(screen, sprites, old_snake, dead_head_direction)
+            
+            draw_food(screen, sprites, food)
+        else:
+            if play_win_sound:
+                winner.play()
+                play_win_sound = False
+            win(screen, sprites, snake)
+
+        if start:
+            start_sound.play()
+            start = False
 
         # Updates screen with drawn sprites
         pygame.display.flip()
