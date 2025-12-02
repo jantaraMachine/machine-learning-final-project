@@ -2,10 +2,9 @@ from random import randint
 
 class Food:
 
-    def __init__(self, map_pos, sound):
+    def __init__(self, map_pos):
         self.map_pos = map_pos
-        self.sound = sound
-    
+
     def get_map_pos(self):
         return self.map_pos
     
@@ -23,5 +22,3 @@ class Food:
             if not food_pos in snake_positions:
                 self.map_pos = food_pos
                 break
-        
-        self.sound.play()

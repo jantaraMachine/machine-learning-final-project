@@ -185,16 +185,6 @@ def load_sprites():
 
     return sprites
 
-def load_sounds():
-
-    start_sound = pygame.mixer.Sound(r"sounds\start.wav")
-    eat = pygame.mixer.Sound(r"sounds\eat.wav")
-    hit = pygame.mixer.Sound(r"sounds\hit.wav")
-    loser = pygame.mixer.Sound(r"sounds\loser.wav")
-    winner = pygame.mixer.Sound(r"sounds\winner.wav")
-
-    return start_sound, eat, hit, loser, winner
-
 # Converts a position on the grid (screen's grid is 17x19) to its appropriate xy-coordinates
 # Each sprite is as big as a tile on the grid for reference
 # EX: If SCALE = 3, (7, 8) on the screen's grid is (336, 384) in xy-coordinates
@@ -214,7 +204,7 @@ def map(map_pos):
     return [grid(map_pos[0]), grid(2) + grid(map_pos[1])]
 
 # Initializes snake, old_snake, and food variables
-def init(sound):
+def init():
 
     # Snake object takes in starting position, starting direction it's going in, and the body type
     # that it is (in this case, snake's head start off as TINY but will change to HEAD as it gains
@@ -241,7 +231,7 @@ def init(sound):
             if food_pos == segment.get_map_pos():
                 passed = False
         if passed == True:
-            return snake, old_snake, Food(food_pos, sound)
+            return snake, old_snake, Food(food_pos)
 
 # Updates the snake's and food's position depending on several factors
 def update_snake(snake, food, tick, current_direction, tiles, alive, score, dead_head_direction):
@@ -882,7 +872,6 @@ def main():
     pygame.display.set_caption("Snake Game")
 
     sprites = load_sprites()
-    start_sound, eat, hit, loser, winner = load_sounds()
 
     pygame.display.set_icon(sprites[ICON])
 
@@ -907,7 +896,7 @@ def main():
         [BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH]
     ]
 
-    snake, old_snake, food = init(eat)
+    snake, old_snake, food = init()
 
     alive = True
 
@@ -920,8 +909,6 @@ def main():
     pause = False
     dead_head_direction = None
     won = False
-    start = True
-    play_win_sound = True
     # ----------------------------------------------------------
 
     # Game loop
@@ -948,13 +935,11 @@ def main():
                 elif event.key == pygame.K_SPACE:
                     if not alive or won:
                         alive = True
-                        snake, old_snake, food = init(eat)
+                        snake, old_snake, food = init()
                         did_death_animation = 0
                         current_direction = NORTH
                         won = False
                         score = 0
-                        start = True
-                        play_win_sound = True
                     elif pause:
                         pause = False
                     else:
@@ -979,27 +964,15 @@ def main():
                 
                 # dead_1 for 100 frames
                 if did_death_animation < 100:
-                    if did_death_animation == 0:
-                        hit.play()
                     dead_1(screen, sprites, old_snake, dead_head_direction)
                     did_death_animation += 1
                 # dead_2 for remainder
                 else:
-                    if did_death_animation == 100:
-                        loser.play()
-                        did_death_animation += 1
                     dead_2(screen, sprites, old_snake, dead_head_direction)
             
             draw_food(screen, sprites, food)
         else:
-            if play_win_sound:
-                winner.play()
-                play_win_sound = False
             win(screen, sprites, snake)
-
-        if start:
-            start_sound.play()
-            start = False
 
         # Updates screen with drawn sprites
         pygame.display.flip()
