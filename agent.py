@@ -74,9 +74,9 @@ class Agent:
             dir_d, 
 
             #food location 
-            food_x < head_x # food left 
-            food_x > head_x # food right 
-            food_y > head_y # food up 
+            food_x < head_x, # food left 
+            food_x > head_x, # food right 
+            food_y > head_y, # food up 
             food_y < head_y # food down 
         ]
         return np.array(state, dtype = int)
