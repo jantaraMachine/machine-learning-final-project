@@ -1107,6 +1107,14 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
             pygame.display.flip()
         
         learning_score += score
+
+        # If dead, update long term memory
+        agent.n_games += 1
+        agent.train_long_memory()
+
+        if score > record:
+            record = score
+            # agent.model.save()
         
         # TODO doing something based on the learning score
     
