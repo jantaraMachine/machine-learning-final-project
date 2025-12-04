@@ -4,7 +4,7 @@ from collections import deque
 import torch
 import random
 import numpy as np
-from model import 
+from model import DQN, QTrainer
 
 MAX_MEMORY = 100_100 # Controls the maximum amount of transitions we're allowed to store/act on
 BATCH_SIZE = 1000
@@ -18,7 +18,7 @@ class Agent:
         self.memory = deque(maxlen=MAX_MEMORY)
         self.model = 
 
-    def get_state(self, game):
+    def get_state(self, board_state):
         pass
 
     def remember(self, state, action, reward, next_state, done):

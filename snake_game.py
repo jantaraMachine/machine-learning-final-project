@@ -1061,10 +1061,12 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
 
         while(alive):
 
+            board_state = get_board_state(tiles, snake, food)
+
             #clock.tick(60) # Keeps game running at 60 fps -- otherwise timing is way off
 
             # Set the old state as the current state for access next loop
-            state_old = agent.get_state(gameState)
+            state_old = agent.get_state(board_state)
 
             pygame.event.pump() # Prevents window from becoming unresponsive
             
@@ -1078,7 +1080,7 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
             # Updates the snake's current condition
             alive, tick, score, _ = update_snake(snake, food, tick, current_direction, tiles, alive, score, None)
 
-            board_state = get_board_state(tiles, snake, food)
+            
             
             if score == 225:
                 learning_score += 10
@@ -1091,7 +1093,7 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
             elif time_since_eaten == death_time:
                 alive = False
             
-            state_new = agent.get_state(gameState) # Get the new state after moving and score update
+            state_new = agent.get_state(board_state) # Get the new state after moving and score update
 
             agent.train_short_memory(state_old, final_move, reward, state_new, alive) # train the short term memory based on what happened this turn
 
