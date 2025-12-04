@@ -1116,7 +1116,7 @@ def main():
     else:
         scale = 3
 
-    if num_args < 5:
+    if num_args < 6:
         player_mode(scale)
     else:
         ai_mode(scale, epochs, num_subtract, punish_time, death_time)
