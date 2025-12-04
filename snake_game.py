@@ -1062,7 +1062,7 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
             # Updates the snake's current condition
             alive, tick, score, _ = update_snake(snake, food, tick, current_direction, tiles, alive, score, None)
 
-            board_state = get_board_state()
+            board_state = get_board_state(tiles, snake, food)
             
             if score == 225:
                 learning_score += 10
