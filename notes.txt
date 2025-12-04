@@ -1,0 +1,159 @@
+Notes on AI training: 
+https://www.youtube.com/watch?v=L8ypSXwyBds&t=1042s
+
+
+Agent: 
+- game 
+- model 
+training 
+- state = get_state(game)
+    needs to have 11 values : 
+        danger_straight 
+        danger_right 
+        danger_left 
+        direction_left 
+        direction_right 
+        direction_up 
+        direction_down 
+        food_left 
+        food_right 
+        food_up 
+        food_down 
+    - held as a bool value example [1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0]
+        - danger straight, move left, food left and up 
+        - need more clarity on the directions 
+- action = get_move(state):
+    - model.predict() 
+- reward, game_over, score = game.play_step(action)
+- new_state = get_state(game)
+-remeber 
+- model.train() 
+
+Game(pygame) 
+- play_step(action)
+    -> reward, game_over, score 
+
+model (pytorch)
+- model.predict(state)
+    action 
+
+
+Deep Q Learning: 
+- Q Value = quality of action 
+    0: init Q value (= init model)
+    1: choose action (model.predict(state))
+    2: Perform action 
+    3: measure reward 
+    4: update Q valye (+train model)
+        repeat 1-4 
+
+
+Game changes= 
+- need a reset function, so agent can restart a new game 
+    def reset(self): 
+
+- need to implenet a reward for the agent 
+    - reward = 1 
+    - game over = -1 
+    - else = 0 
+    we need to reeturn reward, game_over, and score 
+- need to implement a play(action) -> direction 
+- current iteration of game
+    - every time we reset we need to update the iteration 
+    - if the frame iteration is too big if it is bigger than than 100* length of snake we break 
+    - we need to check the frame interation and everytime we play we add 1 
+
+- check collision 
+    - this updates and tells us if the next move if it is a collision returning true or false 
+- do we have a play_step(self, action) function? 
+    - the move now gets action 
+    - we call self.move(action)
+
+- we need to change it to check the point and where we are based on the self 
+
+- action - 3 values [0,0,0]
+    - [1, 0, 0] - straight 
+    - [0, 1, 0] - right 
+    - [0, 0, 1] - left 
+
+
+    - we determine direction based on action 
+    - define directions in clockwise order 
+    - make the idx in the direction array 
+    - we check the different possible states
+        - compare action to current array 
+        - example if action, 0,1,0 
+            - we make a right turn 
+            - next idx = (idx + 1 )mod 4 
+            - new direction = clockwise[next indx]
+        - basically we stay the same move right or move left 
+
+- we control it from the agent 
+
+Agent = 
+- new file 
+- we want to do this through torch 
+    import snake game classes  
+
+- from collections import deque -> data structure to save memory 
+import numpy as np 
+import random 
+
+params:
+- we want a max memory 
+- we want a batch size 
+- Learning rate
+
+create class agent 
+- functions: 
+    - init 
+    - get_state(self, game )
+        - keep track of game  
+        - we want a random 
+        - we also want a discount rate 
+        - we want memory (deque) if we go over this we need to popleft 
+        - model trainer 
+
+    - remember (self, state, action, reward, next_state, done )
+        - basically just keep track of everything 
+    - train_long_memory(self)
+        -basically we train the long memory off the short memory and we have a mini sample of things 
+        - we want to extract this list and then train the computer on that 
+        
+    - traing_short_memory(self) - trains on one step 
+    - get_action(self)
+        we use an epsilon parameter 
+        get final move 
+        we take a random move to get a random value to make a final move and thats based on epsilon 
+        1.08 in video 
+        else we get a prediction move and we predict the move pased on the state 
+            we get a raw value for this take the max and set it to 1 
+
+        return final move
+
+
+
+- global function: train()
+    - keep track of scores and record 
+    - create the agent here and the game 
+    - initalize the game 
+    - we get the states and moves here and then we perform the move and the steps 
+    - basically geting the posiution and states and we remember and store this 
+    - we train short memory first, then we train long memory 
+    - we want to print the score and what not then plot it 
+
+model/actually deep Q training :
+
+import torch 
+import torch.nn as nn 
+import torch.optim as optim 
+import torch.nn.functional as F 
+import os 
+
+class linear_QNet(nn.Module):
+    init: 
+    - input size 
+    - self 
+    - hidden size 
+    - out put size 
+    
