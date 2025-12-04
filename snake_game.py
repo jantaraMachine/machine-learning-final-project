@@ -123,7 +123,7 @@ TINY = 3
 GRASS = 0
 
 # Loads all of the sprites in sprites.png
-def load_sprites(SCALE):
+def load_sprites(scale):
 
     image = pygame.image.load("sprites.png").convert_alpha()
 
@@ -139,17 +139,17 @@ def load_sprites(SCALE):
             if row == 2:
 
                 if col < 6:
-                    sprite = pygame.transform.scale_by(sprite, SCALE)
+                    sprite = pygame.transform.scale_by(sprite, scale)
                     sprites.append(sprite)
                 else:
                     for r in range(2):
                         for c in range(2):
                             small_sprite = pygame.Surface((8, 8), pygame.SRCALPHA)
                             small_sprite.blit(sprite, (0, 0), (c * 8, r * 8, 8, 8))
-                            small_sprite = pygame.transform.scale_by(small_sprite, SCALE)
+                            small_sprite = pygame.transform.scale_by(small_sprite, scale)
                             sprites.append(small_sprite)
             else:
-                sprite = pygame.transform.scale_by(sprite, SCALE)
+                sprite = pygame.transform.scale_by(sprite, scale)
                 sprites.append(sprite)
 
                 if row < 2:
@@ -185,21 +185,21 @@ def load_sprites(SCALE):
 
 # Converts a position on the grid (screen's grid is 17x19) to its appropriate xy-coordinates
 # Each sprite is as big as a tile on the grid for reference
-# EX: If SCALE = 3, (7, 8) on the screen's grid is (336, 384) in xy-coordinates
-def grid(SCALE, grid_pos):
-    # Multiply number by 16 (width of unscaled sprite) times SCALE
-    return grid_pos * 16 * SCALE
+# EX: If scale = 3, (7, 8) on the screen's grid is (336, 384) in xy-coordinates
+def grid(scale, grid_pos):
+    # Multiply number by 16 (width of unscaled sprite) times scale
+    return grid_pos * 16 * scale
 
-def micro_grid(SCALE, micro_grid_pos):
-    return micro_grid_pos * 8 * SCALE
+def micro_grid(scale, micro_grid_pos):
+    return micro_grid_pos * 8 * scale
 
 # A different conversion function that converts a position on the map's grid
 # (the grid that the snake traverses on, a 17x17 grid) to its appropriate
 # xy-coordinates
-# EX: If SCALE = 3, (7, 8) on the map's grid is (336, 480) -- shifted down by 2
+# EX: If scale = 3, (7, 8) on the map's grid is (336, 480) -- shifted down by 2
 # tiles
-def map(SCALE, map_pos):
-    return [grid(SCALE, map_pos[0]), grid(SCALE, 2) + grid(SCALE, map_pos[1])]
+def map(scale, map_pos):
+    return [grid(scale, map_pos[0]), grid(scale, 2) + grid(scale, map_pos[1])]
 
 # Initializes snake, old_snake, and food variables
 def init():
@@ -237,6 +237,9 @@ def update_snake(snake, food, tick, current_direction, tiles, alive, score, dead
     # Moves and updates snake's segments' directions only after 12 ticks
     # (time units, can change ticks to make snake move faster or slower)
     if tick == 12:
+
+        food.tick()
+
         # Iterate through all snake's segments
         for i, segment in enumerate(snake):
             # If i == 0, then we're looking at the head of the snake
@@ -329,35 +332,35 @@ def get_digit_sprite(digit):
     return NINE
 
 # Draws the sprites for the background
-def draw_background(SCALE, screen, sprites, score, alive, pause, won):
+def draw_background(scale, screen, sprites, score, alive, pause, won):
 
     screen.fill(color="black")
 
     screen.blit(sprites[INSTRUCTIONS_1], (0, 0))
-    screen.blit(sprites[INSTRUCTIONS_2], (grid(SCALE, 1), 0))
-    screen.blit(sprites[INSTRUCTIONS_3], (grid(SCALE, 2), 0))
-    screen.blit(sprites[INSTRUCTIONS_4], (grid(SCALE, 3), 0))
-    screen.blit(sprites[INSTRUCTIONS_5], (grid(SCALE, 2), grid(SCALE, 1)))
-    screen.blit(sprites[INSTRUCTIONS_6], (grid(SCALE, 3), grid(SCALE, 1)))
+    screen.blit(sprites[INSTRUCTIONS_2], (grid(scale, 1), 0))
+    screen.blit(sprites[INSTRUCTIONS_3], (grid(scale, 2), 0))
+    screen.blit(sprites[INSTRUCTIONS_4], (grid(scale, 3), 0))
+    screen.blit(sprites[INSTRUCTIONS_5], (grid(scale, 2), grid(scale, 1)))
+    screen.blit(sprites[INSTRUCTIONS_6], (grid(scale, 3), grid(scale, 1)))
 
     # Drawing box -- row 0 and 1
-    screen.blit(sprites[BOX_TL], (grid(SCALE, 6), 0))
+    screen.blit(sprites[BOX_TL], (grid(scale, 6), 0))
 
     for i in range (7, 10):
-        screen.blit(sprites[BOX_T], (grid(SCALE, i), 0))
+        screen.blit(sprites[BOX_T], (grid(scale, i), 0))
 
-    screen.blit(sprites[BOX_TR], (grid(SCALE, 10), 0))
+    screen.blit(sprites[BOX_TR], (grid(scale, 10), 0))
 
-    screen.blit(sprites[BOX_BL], (grid(SCALE, 6), grid(SCALE, 1)))
+    screen.blit(sprites[BOX_BL], (grid(scale, 6), grid(scale, 1)))
 
     for i in range (7, 10):
-        screen.blit(sprites[BOX_B], (grid(SCALE, i), grid(SCALE, 1)))
+        screen.blit(sprites[BOX_B], (grid(scale, i), grid(scale, 1)))
 
-    screen.blit(sprites[BOX_BR], (grid(SCALE, 10), grid(SCALE, 1)))
+    screen.blit(sprites[BOX_BR], (grid(scale, 10), grid(scale, 1)))
 
-    screen.blit(sprites[SCORE_1], (micro_grid(SCALE, 13), grid(SCALE, 1)))
-    screen.blit(sprites[SCORE_2], (micro_grid(SCALE, 14), grid(SCALE, 1)))
-    screen.blit(sprites[SCORE_3], (micro_grid(SCALE, 15), grid(SCALE, 1)))
+    screen.blit(sprites[SCORE_1], (micro_grid(scale, 13), grid(scale, 1)))
+    screen.blit(sprites[SCORE_2], (micro_grid(scale, 14), grid(scale, 1)))
+    screen.blit(sprites[SCORE_3], (micro_grid(scale, 15), grid(scale, 1)))
 
     digits = [int(digit) for digit in str(score)]
     
@@ -375,46 +378,46 @@ def draw_background(SCALE, screen, sprites, score, alive, pause, won):
         tens = digits[1]
         hundreds = digits[0]
     
-    screen.blit(sprites[get_digit_sprite(ones)], (micro_grid(SCALE, 18), grid(SCALE, 1)))
+    screen.blit(sprites[get_digit_sprite(ones)], (micro_grid(scale, 18), grid(scale, 1)))
     
     if tens is not None:
-        screen.blit(sprites[get_digit_sprite(tens)], (micro_grid(SCALE, 17), grid(SCALE, 1)))
+        screen.blit(sprites[get_digit_sprite(tens)], (micro_grid(scale, 17), grid(scale, 1)))
     
     if hundreds is not None:
-        screen.blit(sprites[get_digit_sprite(hundreds)], (micro_grid(SCALE, 16), grid(SCALE, 1)))
+        screen.blit(sprites[get_digit_sprite(hundreds)], (micro_grid(scale, 16), grid(scale, 1)))
     
     if not alive:
-        screen.blit(sprites[GAME_OVER_1], (micro_grid(SCALE, 15), 0))
-        screen.blit(sprites[GAME_OVER_2], (micro_grid(SCALE, 17), 0))
+        screen.blit(sprites[GAME_OVER_1], (micro_grid(scale, 15), 0))
+        screen.blit(sprites[GAME_OVER_2], (micro_grid(scale, 17), 0))
     
     if pause:
-        screen.blit(sprites[PAUSED_1], (micro_grid(SCALE, 15), 0))
-        screen.blit(sprites[PAUSED_2], (micro_grid(SCALE, 17), 0))
+        screen.blit(sprites[PAUSED_1], (micro_grid(scale, 15), 0))
+        screen.blit(sprites[PAUSED_2], (micro_grid(scale, 17), 0))
     
     if won:
-        screen.blit(sprites[YOU_WIN_1], (micro_grid(SCALE, 15), 0))
-        screen.blit(sprites[YOU_WIN_2], (micro_grid(SCALE, 17), 0))
+        screen.blit(sprites[YOU_WIN_1], (micro_grid(scale, 15), 0))
+        screen.blit(sprites[YOU_WIN_2], (micro_grid(scale, 17), 0))
         
     # Drawing grass -- rows 2 through 18
     for row in range (2, 19):
         for col in range (17):
             if row == 2 or row == 18:
-                screen.blit(sprites[BUSH], (grid(SCALE, col), grid(SCALE, row)))
+                screen.blit(sprites[BUSH], (grid(scale, col), grid(scale, row)))
             elif col == 0 or col == 16:
-                screen.blit(sprites[BUSH], (grid(SCALE, col), grid(SCALE, row)))
+                screen.blit(sprites[BUSH], (grid(scale, col), grid(scale, row)))
             elif row % 2 == 1:
                 if col % 2 == 1:
-                    screen.blit(sprites[GRASS_1], (grid(SCALE, col), grid(SCALE, row)))
+                    screen.blit(sprites[GRASS_1], (grid(scale, col), grid(scale, row)))
                 else:
-                    screen.blit(sprites[GRASS_2], (grid(SCALE, col), grid(SCALE, row)))
+                    screen.blit(sprites[GRASS_2], (grid(scale, col), grid(scale, row)))
             else:
                 if col % 2 == 1:
-                    screen.blit(sprites[GRASS_2], (grid(SCALE, col), grid(SCALE, row)))
+                    screen.blit(sprites[GRASS_2], (grid(scale, col), grid(scale, row)))
                 else:
-                    screen.blit(sprites[GRASS_1], (grid(SCALE, col), grid(SCALE, row)))
+                    screen.blit(sprites[GRASS_1], (grid(scale, col), grid(scale, row)))
 
 # Draws the sprites for the snake
-def draw_snake(SCALE, screen, sprites, snake, food):
+def draw_snake(scale, screen, sprites, snake, food):
     # Iterate through segments of the snake
     for i, segment in enumerate(snake):
 
@@ -422,7 +425,7 @@ def draw_snake(SCALE, screen, sprites, snake, food):
         direction = segment.get_direction()
         body_part = segment.get_body_part()
         map_pos = segment.get_map_pos()
-        position = map(SCALE, map_pos) # Convert from map position
+        position = map(scale, map_pos) # Convert from map position
 
         # Get the direction of the segment ahead of the current segment to use
         # for proper sprite drawing (specifically for corners)
@@ -543,12 +546,12 @@ def draw_snake(SCALE, screen, sprites, snake, food):
 # Draws the sprites for the first part of the death animation --
 # replaces the HEAD with a BONK sprite.
 # Follows the same logic as draw_snake() without food logic
-def dead_1(SCALE, screen, sprites, a_snake, dead_head_direction):
+def dead_1(scale, screen, sprites, a_snake, dead_head_direction):
     for i, segment in enumerate(a_snake):
 
         direction = segment.get_direction()
         body_part = segment.get_body_part()
-        position = map(SCALE, segment.get_map_pos())
+        position = map(scale, segment.get_map_pos())
 
         ahead_direction = a_snake[i - 1].get_direction()
 
@@ -654,12 +657,12 @@ def dead_1(SCALE, screen, sprites, a_snake, dead_head_direction):
 # Draws the sprites for the second part of the death animation --
 # replaces the HEAD with a DEAD sprite.
 # Follows the same logic as dead_1()
-def dead_2(SCALE, screen, sprites, a_snake, dead_head_direction):
+def dead_2(scale, screen, sprites, a_snake, dead_head_direction):
     for i, segment in enumerate(a_snake):
 
         direction = segment.get_direction()
         body_part = segment.get_body_part()
-        position = map(SCALE, segment.get_map_pos())
+        position = map(scale, segment.get_map_pos())
 
         ahead_direction = a_snake[i - 1].get_direction()
 
@@ -763,14 +766,14 @@ def dead_2(SCALE, screen, sprites, a_snake, dead_head_direction):
                         screen.blit(sprites[TAIL_E], (position[0], position[1]))
 
 # Draws the happy winning snake
-def win(SCALE, screen, sprites, a_snake):
+def win(scale, screen, sprites, a_snake):
     for i, segment in enumerate(a_snake):
 
         # Get all its data points (direction, body_part, grid_pos)
         direction = segment.get_direction()
         body_part = segment.get_body_part()
         map_pos = segment.get_map_pos()
-        position = map(SCALE, map_pos) # Convert from map position
+        position = map(scale, map_pos) # Convert from map position
 
         # Get the direction of the segment ahead of the current segment to use
         # for proper sprite drawing (specifically for corners)
@@ -854,34 +857,21 @@ def win(SCALE, screen, sprites, a_snake):
                     screen.blit(sprites[TAIL_E], (position[0], position[1]))
 
 # Draws the food depending on its position
-def draw_food(SCALE, screen, sprites, food):
-    position = map(SCALE, food.get_map_pos()) # Converts from map coordinates
+def draw_food(scale, screen, sprites, food):
+    position = map(scale, food.get_map_pos()) # Converts from map coordinates
     screen.blit(sprites[FOOD], (position[0], position[1]))
 
-# Main function
-def main():
-
-    SCALE = None
-
-    try:
-        SCALE = argv[1]
-    except:
-        SCALE = 3
-
-    try:
-        SCALE = int(SCALE)
-    except:
-        exception("Scale must be an integer.")
+def player_mode(scale):
 
     # Initializing variables -----------------------------------
-    width = 272 * SCALE
-    height = 304 * SCALE
+    width = 272 * scale
+    height = 304 * scale
 
     pygame.init()
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption("Snake Game")
 
-    sprites = load_sprites(SCALE)
+    sprites = load_sprites(scale)
 
     pygame.display.set_icon(sprites[ICON])
 
@@ -958,7 +948,7 @@ def main():
         if alive and not pause and not won:
             alive, tick, score, dead_head_direction = update_snake(snake, food, tick, current_direction, tiles, alive, score, dead_head_direction)
 
-        draw_background(SCALE, screen, sprites, score, alive, pause, won)
+        draw_background(scale, screen, sprites, score, alive, pause, won)
 
         if score == 225:
             won = True
@@ -966,7 +956,7 @@ def main():
         if not won:
             # Draws snake normally if alive
             if alive:
-                draw_snake(SCALE, screen, sprites, snake, food)
+                draw_snake(scale, screen, sprites, snake, food)
                 if tick == 0: # Updates old_snake to be current snake after it moves
                     old_snake = deepcopy(snake)
             # Draws death animation if snake is dead
@@ -974,21 +964,162 @@ def main():
                 
                 # dead_1 for 100 frames
                 if did_death_animation < 100:
-                    dead_1(SCALE, screen, sprites, old_snake, dead_head_direction)
+                    dead_1(scale, screen, sprites, old_snake, dead_head_direction)
                     did_death_animation += 1
                 # dead_2 for remainder
                 else:
-                    dead_2(SCALE, screen, sprites, old_snake, dead_head_direction)
+                    dead_2(scale, screen, sprites, old_snake, dead_head_direction)
             
-            draw_food(SCALE, screen, sprites, food)
+            draw_food(scale, screen, sprites, food)
         else:
-            win(SCALE, screen, sprites, snake)
+            win(scale, screen, sprites, snake)
 
         # Updates screen with drawn sprites
         pygame.display.flip()
 
     # Quits if running = False
     pygame.quit()
+
+def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
+
+    # Initializing variables -----------------------------------
+    width = 272 * scale
+    height = 304 * scale
+
+    pygame.init()
+    screen = pygame.display.set_mode((width, height))
+    pygame.display.set_caption("Snake Game")
+
+    sprites = load_sprites(scale)
+
+    pygame.display.set_icon(sprites[ICON])
+
+    # Specifies what kind of tile each map tile is -- used for collision
+    tiles = [
+        [BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH]
+    ]
+
+    clock = pygame.time.Clock()
+
+    # ----------------------------------------------------------
+
+    for _ in range(epochs):
+
+        snake, _, food = init()
+
+        alive = True
+
+        tick = 0
+        current_direction = None
+        score = 0
+
+        learning_score = 0
+
+        while(alive):
+
+            #clock.tick(60) # Keeps game running at 60 fps -- otherwise timing is way off
+
+            pygame.event.pump() # Prevents window from becoming unresponsive
+            
+            # TODO on getting AI's directional input -- setting current_direction to NORTH for now
+            current_direction = NORTH
+
+            # Updates the snake's current condition
+            alive, tick, score, _ = update_snake(snake, food, tick, current_direction, tiles, alive, score, None)
+            
+            if score == 225:
+                learning_score += 10
+
+            time_since_eaten = food.get_time_since_eaten()
+
+            if time_since_eaten == punish_time:
+                learning_score -= num_subtract
+                food.reset_time_since_eaten()
+            elif time_since_eaten == death_time:
+                alive = False
+            
+            draw_background(scale, screen, sprites, score, alive, False, False)
+
+            draw_snake(scale, screen, sprites, snake, food)
+
+            # This version does not bother drawing the death animation when dying, so snake will intersect with the wall
+            # briefly before dying in this version.
+
+            pygame.display.flip()
+        
+        learning_score += score
+        
+        # TODO doing something based on the learning score
+    
+    pygame.quit()
+
+# Main function
+def main():
+
+    # Command line format: python snake_game scale num_epochs num_subtract punish_time
+
+    scale = None
+    epochs = None
+    num_subtract = None
+    punish_time = None
+    death_time = None
+
+    num_args = len(argv)
+
+    if num_args > 1:
+
+        scale = argv[1]
+
+        if num_args == 6:
+            epochs = argv[2]
+            num_subtract = argv[3]
+            punish_time = argv[4]
+            death_time = argv[5]
+
+            try:
+                epochs = int(epochs)
+            except TypeError:
+                print("All command line arguments must be integers.")
+            try:
+                num_subtract = int(num_subtract)
+            except TypeError:
+                print("All command line arguments must be integers.")
+            try:
+                punish_time = int(punish_time)
+            except TypeError:
+                print("All command line arguments must be integers.")
+            try:
+                death_time = int(death_time)
+            except TypeError:
+                print("All command line arguments must be integers.")
+        try:
+            scale = int(scale)
+        except TypeError:
+            print("All command line arguments must be integers.")
+
+    else:
+        scale = 3
+
+    if num_args < 5:
+        player_mode(scale)
+    else:
+        ai_mode(scale, epochs, num_subtract, punish_time, death_time)
 
 if __name__ == "__main__":
     main()
