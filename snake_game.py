@@ -6,6 +6,8 @@ from copy import deepcopy
 from snake import Snake
 from food import Food
 
+from agent import Agent
+
 HEAD_N = 0
 HEAD_W = 1
 HEAD_S = 2
@@ -1031,13 +1033,27 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
 
         learning_score = 0
 
+        plot_scores = []
+        plot_mean_scores = []
+        total_score = 0
+        record = 0
+        agent = Agent()
+    
+
         while(alive):
 
             #clock.tick(60) # Keeps game running at 60 fps -- otherwise timing is way off
 
+            # Set the old state as the current state for access next loop
+            state_old = agent.get_state(gameState)
+
             pygame.event.pump() # Prevents window from becoming unresponsive
             
             # TODO on getting AI's directional input -- setting current_direction to NORTH for now
+
+            final_move = agent.get_action(state_old) # Get the AI's move based on its state
+
+            # Set the current direction based on this move
             current_direction = NORTH
 
             # Updates the snake's current condition
@@ -1054,6 +1070,12 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
             elif time_since_eaten == death_time:
                 alive = False
             
+            state_new = agent.get_state(gameState) # Get the new state after moving and score update
+
+            agent.train_short_memory(state_old, final_move, reward, state_new, alive) # train the short term memory based on what happened this turn
+
+            
+
             draw_background(scale, screen, sprites, score, alive, False, False)
 
             draw_snake(scale, screen, sprites, snake, food)
