@@ -121,6 +121,7 @@ TAIL = 2
 TINY = 3
 
 GRASS = 0
+SNAKE = 1
 
 # Loads all of the sprites in sprites.png
 def load_sprites(scale):
@@ -861,6 +862,24 @@ def draw_food(scale, screen, sprites, food):
     position = map(scale, food.get_map_pos()) # Converts from map coordinates
     screen.blit(sprites[FOOD], (position[0], position[1]))
 
+# Returns board state
+def get_board_state(tiles, snake, food):
+
+    board_state = tiles.deepcopy()
+
+    for segment in snake:
+
+        snake_pos = segment.get_map_pos()
+
+        board_state[snake_pos[0], snake_pos[1]] = SNAKE
+    
+    food_pos = food.get_map_pos()
+
+    board_state[food_pos[0], food_pos[1]] = FOOD
+
+    return board_state
+
+
 def player_mode(scale):
 
     # Initializing variables -----------------------------------
@@ -1042,6 +1061,8 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
 
             # Updates the snake's current condition
             alive, tick, score, _ = update_snake(snake, food, tick, current_direction, tiles, alive, score, None)
+
+            board_state = get_board_state()
             
             if score == 225:
                 learning_score += 10
