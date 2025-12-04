@@ -235,11 +235,11 @@ def init():
             return snake, old_snake, Food(food_pos)
 
 # Updates the snake's and food's position depending on several factors
-def update_snake(snake, food, tick, current_direction, tiles, alive, score, dead_head_direction):
+def update_snake(snake, food, tick, current_direction, tiles, alive, score, dead_head_direction, num_ticks):
 
     # Moves and updates snake's segments' directions only after 12 ticks
     # (time units, can change ticks to make snake move faster or slower)
-    if tick == 12:
+    if tick == num_ticks:
 
         food.tick()
 
@@ -881,7 +881,6 @@ def get_board_state(tiles, snake, food):
 
     return board_state
 
-
 def player_mode(scale):
 
     # Initializing variables -----------------------------------
@@ -967,7 +966,7 @@ def player_mode(scale):
                         pause = True
         # Updates the snake's current condition + living status + tick count if alive
         if alive and not pause and not won:
-            alive, tick, score, dead_head_direction = update_snake(snake, food, tick, current_direction, tiles, alive, score, dead_head_direction)
+            alive, tick, score, dead_head_direction = update_snake(snake, food, tick, current_direction, tiles, alive, score, dead_head_direction, 12)
 
         draw_background(scale, screen, sprites, score, alive, pause, won)
 
@@ -1078,7 +1077,7 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
             current_direction = NORTH
 
             # Updates the snake's current condition
-            alive, tick, learning_score, _ = update_snake(snake, food, tick, current_direction, tiles, alive, learning_score, None)
+            alive, tick, learning_score, _ = update_snake(snake, food, tick, current_direction, tiles, alive, learning_score, None, 1)
 
             
             
