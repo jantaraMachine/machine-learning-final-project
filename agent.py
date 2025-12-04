@@ -14,9 +14,10 @@ class Agent:
     def __init__(self, stateCount):
         self.n_games = 0
         self.epsilon = 0 # Epsilon value which controls randomness in action selection
-        self.gamma - 0 # Gamma value which controls the importance which the model places on weighting certain outcomes in the near future versus possible outcomes in the far future
+        self.gamma = 0 # Gamma value which controls the importance which the model places on weighting certain outcomes in the near future versus possible outcomes in the far future
         self.memory = deque(maxlen=MAX_MEMORY)
         self.model = DQN(stateCount)
+        self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
     def get_state(self, board_state):
         pass
