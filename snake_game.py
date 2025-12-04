@@ -1078,7 +1078,7 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
             current_direction = NORTH
 
             # Updates the snake's current condition
-            alive, tick, score, _ = update_snake(snake, food, tick, current_direction, tiles, alive, score, None)
+            alive, tick, learning_score, _ = update_snake(snake, food, tick, current_direction, tiles, alive, learning_score, None)
 
             
             
@@ -1107,8 +1107,6 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
             # briefly before dying in this version.
 
             pygame.display.flip()
-        
-        learning_score += score
 
         # If dead, update long term memory
         agent.n_games += 1
