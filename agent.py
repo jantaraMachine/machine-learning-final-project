@@ -5,7 +5,6 @@ from collections import deque
 import torch
 import random
 import numpy as np
-from model import 
 
 BUSH = 20 
 GRASS = 0 
@@ -22,7 +21,8 @@ class Agent:
         self.epsilon = 0 # Epsilon value which controls randomness in action selection
         self.gamma - 0 # Gamma value which controls the importance which the model places on weighting certain outcomes in the near future versus possible outcomes in the far future
         self.memory = deque(maxlen=MAX_MEMORY)
-        self.model = # TODO
+        self.model =  None #todo 
+        self.trainer = None #todo 
 
     
     # For direction: NORTH = 0 | WEST = 1 | SOUTH = 2 | EAST = 3
@@ -74,10 +74,10 @@ class Agent:
             dir_d, 
 
             #food location 
-            food_x < head_x # food left 
-            food_x > head_x # food right 
-            food_y > head_y # food up 
-            food_y < head_y # food down 
+            food_x < head_x, # food left 
+            food_x > head_x, # food right 
+            food_y > head_y, # food up 
+            food_y < head_y, # food down 
         ]
         return np.array(state, dtype = int)
 
@@ -90,15 +90,107 @@ class Agent:
         # if we call the snake position we get the map positon and then we have to call the map function on it 
 
     def remember(self, state, action, reward, next_state, done):
-        pass
+        self.memory.append((state, action, reward, next_state, done)) # we want to return one tuple 
 
     def train_long_memory(self):
-        pass
+        #take variables from memory 
+        #checking if we already have 1000 samples 
+        if len(self.memory) > BATCH_SIZE:
+            mini_sample = random.sample(self.memory, BATCH_SIZE) #returns list of tuples 
+        else: 
+            mini_sample = self.memory 
+        
+        #we want to put everything together and extracts it 
+        states, actions, rewards, next_states, dones, = zip(*mini_sample)
+
+        #we have a list of tuples now 
+        self.trainer.train_step(states, actions, rewards, next_states, dones)
+        
+
 
     def train_short_memory(self, state, action, reward, next_state, done):
-        pass
+        self.train.train_step(state, action, reward, next_state, done) 
 
     def get_action(self):
-        pass
+        # we want to do some random moves, the better our model gets = less random moves 
 
+        # the more games the smaller the epsilon gets then we dont use random move 
+        self.epsilon = 100 - self.n_games # this doesn't have to be definitive just random val
+        final_move = [0,0,0]
+
+        if random.randint(0,200) < self.epsilon: 
+            move = random.randint(0, 2) # gives us a random value
+            final_move[move] = 1 
+        else: 
+            #if we dont have any random moves left
+            # we want to make the state a tensor 
+            state = torch.tensor(state, dtype = torch.float) 
+            prediction = self.model.predict(state0) 
+            #take the raw value array and get max of the highest state in tuple to get the move 
+            move = torch.argmax(prediction).item() 
+            final_move[move] = 1
+
+        return final_move 
+
+    #define the training state 
+    ## not sure if we have already done this 
+    def train():
+        # keep track of scores
+        scores = [] 
+        average_scores = [] 
+        total_score = 0 
+        record = 0 
+        # we want to set up an agent 
+        agent = Agent() 
+        game = snake_game() 
+
+        #create training loop, runs until we quit 
+        while True: 
+            # get current state 
+            state_current = agent.get_state(game)
+
+            #get move based on current state 
+            final_move = agent.get_action(state_current)
+
+            #perform move and get new state
+            # not sure what is happening with reward but i'm just gonna keep this for now
+            ## reward, done, score = game. ??? 
+            state_new = agent.get_state(game)
+
+            #we want to train short memory first 
+            agent.train_short_memory(state_current, final_move, reward, state_new, done)
+
+            # remeber 
+            agent.remember(state_current, final_move, reward, state_new, done)
+
+            if done: 
+                #train long memory 
+                #trains again on all previous moves 
+                # helps with improvement 
+                game.reset() # we want to reset the game
+                agent.n_games += 1 
+                agent.train_long_memory() 
+
+                #check if we have a new high score 
+                if score > record: 
+                    record = score 
+                    #agent.model.save() TODO 
+
+                print('Game', agent.n_games, 'Score', score, 'Record:', record)
+
+                #TODO plot 
+
+if __name__ == '__main__': 
+    train() 
     
+
+
+
+
+
+
+
+
+
+
+
