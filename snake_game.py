@@ -123,7 +123,7 @@ TAIL = 2
 TINY = 3
 
 GRASS = 0
-SNAKE = 1
+SNAKE = 1 
 
 # Loads all of the sprites in sprites.png
 def load_sprites(scale):
@@ -235,11 +235,11 @@ def init():
             return snake, old_snake, Food(food_pos)
 
 # Updates the snake's and food's position depending on several factors
-def update_snake(snake, food, tick, current_direction, tiles, alive, score, dead_head_direction, num_ticks):
+def update_snake(snake, food, tick, current_direction, tiles, alive, score, dead_head_direction):
 
     # Moves and updates snake's segments' directions only after 12 ticks
     # (time units, can change ticks to make snake move faster or slower)
-    if tick == num_ticks:
+    if tick == 12:
 
         food.tick()
 
@@ -966,7 +966,7 @@ def player_mode(scale):
                         pause = True
         # Updates the snake's current condition + living status + tick count if alive
         if alive and not pause and not won:
-            alive, tick, score, dead_head_direction = update_snake(snake, food, tick, current_direction, tiles, alive, score, dead_head_direction, 12)
+            alive, tick, score, dead_head_direction = update_snake(snake, food, tick, current_direction, tiles, alive, score, dead_head_direction)
 
         draw_background(scale, screen, sprites, score, alive, pause, won)
 
@@ -1077,7 +1077,7 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
             current_direction = NORTH
 
             # Updates the snake's current condition
-            alive, tick, learning_score, _ = update_snake(snake, food, tick, current_direction, tiles, alive, learning_score, None, 1)
+            alive, tick, score, _ = update_snake(snake, food, tick, current_direction, tiles, alive, score, None)
 
             
             
@@ -1106,6 +1106,8 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
             # briefly before dying in this version.
 
             pygame.display.flip()
+        
+        learning_score += score
 
         # If dead, update long term memory
         agent.n_games += 1
