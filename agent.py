@@ -77,7 +77,7 @@ class Agent:
             food_x < head_x, # food left 
             food_x > head_x, # food right 
             food_y > head_y, # food up 
-            food_y < head_y, # food down 
+            food_y < head_y # food down 
         ]
         return np.array(state, dtype = int)
 

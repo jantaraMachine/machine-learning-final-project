@@ -237,6 +237,8 @@ def init():
 # Updates the snake's and food's position depending on several factors
 def update_snake(snake, food, tick, current_direction, tiles, alive, score, dead_head_direction):
 
+    reward = 0
+
     # Moves and updates snake's segments' directions only after 12 ticks
     # (time units, can change ticks to make snake move faster or slower)
     if tick == 12:
@@ -286,7 +288,7 @@ def update_snake(snake, food, tick, current_direction, tiles, alive, score, dead
                             snake.insert(1, Snake([head_map_pos[0] - 1, head_map_pos[1]], prev, BODY))
                         
                     food.eat(snake) # Food will be teleported somewhere else
-                    score += 1
+                    reward = 100
 
                     break
                 # If the head is in the same spot as a BUSH (aka the wall), kill the snake and quit the loop
@@ -307,10 +309,10 @@ def update_snake(snake, food, tick, current_direction, tiles, alive, score, dead
                 prev = segment.change_direction(prev)
                 segment.move()
         # Return whether the snake is alive or not and reset ticks to 0 (the snake has moved)
-        return alive, 0, score, dead_head_direction
+        return alive, 0, reward, dead_head_direction
     else:
         # Return that the snake is alive and add 1 tick (the snake has not moved)
-        return alive, tick + 1, score, dead_head_direction
+        return alive, tick + 1, reward, dead_head_direction
 
 def get_digit_sprite(digit):
 
