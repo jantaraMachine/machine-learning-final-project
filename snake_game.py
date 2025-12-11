@@ -1062,6 +1062,8 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
 
         while(alive):
 
+            reward = 1 # Set the default reward to be 1. This provides the snake a short and long term incentive to stay alive.
+
             board_state = get_board_state(tiles, snake, food)
 
             #clock.tick(60) # Keeps game running at 60 fps -- otherwise timing is way off
@@ -1078,21 +1080,23 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
             # Set the current direction based on this move
             current_direction = NORTH
 
+            time_to_eat = food.get_time_since_eaten()
+
             # Updates the snake's current condition
             alive, tick, score, _ = update_snake(snake, food, tick, current_direction, tiles, alive, score, None)
 
-            
-            
-            if score == 225:
-                learning_score += 10
-
             time_since_eaten = food.get_time_since_eaten()
 
-            if time_since_eaten == punish_time:
-                learning_score -= num_subtract
+            if time_since_eaten == 0: # If the snake ate the food this turn, give it a higher reward. This incentivises the snake to go for the food
+                reward = 100
+            elif time_since_eaten == punish_time: # If the snake exceeds a certain number of hyperparametrized steps without eating the apple, punish the snake on this turn.
+                reward = -num_subtract
                 food.reset_time_since_eaten()
-            elif time_since_eaten == death_time:
+            elif time_since_eaten == death_time: # Straight up just kill the snake if it exceeds a certain hyperparametrized turn count without eating
                 alive = False
+
+            if not alive:
+                reward = -10000 # Dying should always be an overriding punishment
             
             state_new = agent.get_state(board_state) # Get the new state after moving and score update
 
