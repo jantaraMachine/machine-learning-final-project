@@ -1,17 +1,17 @@
 # Authored by Athena Osborne and Kali Bateman
-import snake_game.py 
-import snake.py 
 from collections import deque
 import torch
 import random
 import numpy as np
+from model import DQN, QTrainer
+import matplotlib.pyplot as plt
 
 BUSH = 20 
 GRASS = 0 
 SNAKE = 1 
 FOOD = 22
 
-MAX_MEMORY = 100_100 # Controls the maximum amount of transitions we're allowed to store/act on
+MAX_MEMORY = 100_000 # Controls the maximum amount of transitions we're allowed to store/act on
 BATCH_SIZE = 1000
 LR = 0.001 # Learning Rate
 
@@ -19,10 +19,11 @@ class Agent:
     def __init__(self):
         self.n_games = 0
         self.epsilon = 0 # Epsilon value which controls randomness in action selection
-        self.gamma - 0 # Gamma value which controls the importance which the model places on weighting certain outcomes in the near future versus possible outcomes in the far future
+        self.gamma = 0.9 # Gamma value which controls the importance which the model places on weighting certain outcomes in the near future versus possible outcomes in the far future
         self.memory = deque(maxlen=MAX_MEMORY)
-        self.model =  None #todo 
-        self.trainer = None #todo 
+        #create instance of model/trainer
+        self.model = DQN(11)
+        self.trainer = QTrainer(self.model, lr = LR, gamma=self.gamma) 
 
     
     # For direction: NORTH = 0 | WEST = 1 | SOUTH = 2 | EAST = 3
@@ -41,7 +42,7 @@ class Agent:
         point_d = (head_x, head_y + 1)
 
         #get direction of snake 
-        direction = snake.get_direction() 
+        direction = snake[0].get_direction() 
         dir_l = direction == 1
         dir_r = direction == 3
         dir_u = direction == 0 
@@ -50,22 +51,22 @@ class Agent:
         #collision if board_state[x][y] returns 1 or 20 
         state = [
             # danger straight 
-            (dir_r and (board_state(point_r) == (1 or 20))) or 
-            (dir_l and (board_state(point_l) == (1 or 20))) or 
-            (dir_u and (board_state(point_u) == (1 or 20))) or 
-            (dir_d and (board_state(point_d) == (1 or 20))), 
+            (dir_r and (board_state[point_r[1]][point_r[0]] == SNAKE or board_state[point_r[1]][point_r[0]] == BUSH)) or  
+            (dir_l and (board_state[point_l[1]][point_l[0]] == SNAKE or board_state[point_l[1]][point_l[0]] == BUSH)) or
+            (dir_u and (board_state[point_u[1]][point_u[0]] == SNAKE or board_state[point_u[1]][point_u[0]] == BUSH)) or
+            (dir_d and (board_state[point_d[1]][point_d[0]] == SNAKE or board_state[point_d[1]][point_d[0]] == BUSH)),
 
             # danger right 
-            (dir_u and (board_state(point_r) == (1 or 20))) or 
-            (dir_d and (board_state(point_l) == (1 or 20))) or 
-            (dir_l and (board_state(point_u) == (1 or 20))) or 
-            (dir_r and (board_state(point_d) == (1 or 20))), 
+            (dir_u and (board_state[point_r[1]][point_r[0]] == SNAKE or board_state[point_r[1]][point_r[0]] == BUSH)) or 
+            (dir_d and (board_state[point_l[1]][point_l[0]] == SNAKE or board_state[point_l[1]][point_l[0]] == BUSH)) or 
+            (dir_l and (board_state[point_u[1]][point_u[0]] == SNAKE or board_state[point_u[1]][point_u[0]] == BUSH)) or 
+            (dir_r and (board_state[point_d[1]][point_d[0]] == SNAKE or board_state[point_d[1]][point_d[0]] == BUSH)),
 
             # danger left 
-            (dir_d and (board_state(point_r) == (1 or 20))) or 
-            (dir_u and (board_state(point_l) == (1 or 20))) or 
-            (dir_r and (board_state(point_u) == (1 or 20))) or 
-            (dir_l and (board_state(point_d) == (1 or 20))), 
+            (dir_d and (board_state[point_r[1]][point_r[0]] == SNAKE or board_state[point_r[1]][point_r[0]] == BUSH)) or 
+            (dir_u and (board_state[point_l[1]][point_l[0]] == SNAKE or board_state[point_l[1]][point_l[0]] == BUSH)) or 
+            (dir_r and (board_state[point_u[1]][point_u[0]] == SNAKE or board_state[point_u[1]][point_u[0]] == BUSH)) or 
+            (dir_l and (board_state[point_d[1]][point_d[0]] == SNAKE or board_state[point_d[1]][point_d[0]] == BUSH)),
 
             #move direction 
             dir_l, 
@@ -76,8 +77,8 @@ class Agent:
             #food location 
             food_x < head_x, # food left 
             food_x > head_x, # food right 
-            food_y > head_y, # food up 
-            food_y < head_y # food down 
+            food_y < head_y, # food up 
+            food_y > head_y # food down 
         ]
         return np.array(state, dtype = int)
 
@@ -101,7 +102,7 @@ class Agent:
             mini_sample = self.memory 
         
         #we want to put everything together and extracts it 
-        states, actions, rewards, next_states, dones, = zip(*mini_sample)
+        states, actions, rewards, next_states, dones = zip(*mini_sample)
 
         #we have a list of tuples now 
         self.trainer.train_step(states, actions, rewards, next_states, dones)
@@ -109,7 +110,7 @@ class Agent:
 
 
     def train_short_memory(self, state, action, reward, next_state, done):
-        self.train.train_step(state, action, reward, next_state, done) 
+        self.trainer.train_step(state, action, reward, next_state, done) 
 
     def get_action(self):
         # we want to do some random moves, the better our model gets = less random moves 
@@ -124,8 +125,8 @@ class Agent:
         else: 
             #if we dont have any random moves left
             # we want to make the state a tensor 
-            state = torch.tensor(state, dtype = torch.float) 
-            prediction = self.model.predict(state0) 
+            state0 = torch.tensor(state, dtype = torch.float) 
+            prediction = self.model(state0) 
             #take the raw value array and get max of the highest state in tuple to get the move 
             move = torch.argmax(prediction).item() 
             final_move[move] = 1
@@ -179,6 +180,20 @@ class Agent:
                 print('Game', agent.n_games, 'Score', score, 'Record:', record)
 
                 #TODO plot 
+                # plot the results from training, number of games and score in snake game when run 
+
+def plot(scores, mean_scores):
+    #allows us to plot and see results 
+    plt.clf() 
+    plt.title('Training Progress')
+    plt.xlabel('Game Number')
+    plt.ylabel('Score')
+    plt.plot(scores, label='Score')
+    plt.plot(mean_scores, label = 'Average Score')
+    plt.legend() 
+    plt.pause(0.1)
+
+
 
 if __name__ == '__main__': 
     train() 

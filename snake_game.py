@@ -8,6 +8,11 @@ from food import Food
 
 from agent import Agent
 
+from agent import plot 
+import matplotlib.pyplot as plt 
+
+plt.ion()
+
 HEAD_N = 0
 HEAD_W = 1
 HEAD_S = 2
@@ -1123,7 +1128,11 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
             record = score
             # agent.model.save()
         
-        # TODO doing something based on the learning score
+        plot_scores.append(score)
+        total_score += score 
+        mean_score = total_score / agent.n_games
+        plot_mean_scores.append(mean_score)
+        plot(plot_scores, plot_mean_scores) 
     
     pygame.quit()
 

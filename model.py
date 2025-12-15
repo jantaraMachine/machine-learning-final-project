@@ -5,16 +5,17 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
+import os 
 
-Transition = namedtuple('Transition', 'state', 'action', 'next_state', 'reward')
 
 class DQN(nn.Module):
 
     def __init__(self, n_observations):
+        ## call super initalizer 
         super(DQN, self).__init__()
         self.layer1 = nn.Linear(n_observations, 128)
         self.layer2 = nn.Linear(128, 128)
-        self.layer3 = nn.Linear(128, 4)
+        self.layer3 = nn.Linear(128, 3)
 
     def forward(self, x):
         x = F.relu(self.layer1(x))
@@ -33,7 +34,7 @@ class QTrainer:
         self.criterion = nn.MSELoss()
 
     def train_step(self, state_old, action, reward, next_state, done):
-        state = torch.tensor(state, dtype=torch.float)
+        state = torch.tensor(state_old, dtype=torch.float)
         next_state = torch.tensor(next_state, dtype=torch.float)
         action = torch.tensor(action, dtype=torch.long)
         reward = torch.tensor(reward, dtype=torch.float)
@@ -54,11 +55,12 @@ class QTrainer:
             if not done[i]:
                 Q_new = reward[i] + self.gamma * torch.max(self.model(next_state[i]))
             target[i][torch.argmax(action[i]).item()] = Q_new
-        
-        self.optimizer()
+       
+        # Predict Q values for a given action, then maximize
+        self.optimizer.zero_grad()
         loss = self.criterion(target, pred)
         loss.backward()
-
+ 
         self.optimizer.step()
 
-        # Predict Q values for a given action, then maximize
+        
