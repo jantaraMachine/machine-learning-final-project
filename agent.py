@@ -13,7 +13,7 @@ FOOD = 22
 
 MAX_MEMORY = 100_000 # Controls the maximum amount of transitions we're allowed to store/act on
 BATCH_SIZE = 1000
-LR = 0.001 # Learning Rate
+LR = 0.01 # Learning Rate
 
 class Agent:
     def __init__(self):
@@ -108,7 +108,7 @@ class Agent:
         #take variables from memory 
         #checking if we already have 1000 samples 
         ##add check to see if there is stuff to train long memory 
-        if len(self.memory) == 0: 
+        if len(self.memory) < 100: 
             return 
 
         if len(self.memory) > BATCH_SIZE:
@@ -131,7 +131,7 @@ class Agent:
         # we want to do some random moves, the better our model gets = less random moves 
 
         # the more games the smaller the epsilon gets then we dont use random move 
-        self.epsilon = 100 - self.n_games # this doesn't have to be definitive just random val
+        self.epsilon = 80 - self.n_games # this doesn't have to be definitive just random val
         final_move = [0,0,0]
 
         if random.randint(0,200) < self.epsilon: 
