@@ -873,18 +873,16 @@ def draw_food(scale, screen, sprites, food):
 
 # Returns board state
 def get_board_state(tiles, snake, food):
-
-    board_state = tiles.deepcopy()
+    from copy import deepcopy
+    board_state = deepcopy(tiles)
 
     for segment in snake:
-
         snake_pos = segment.get_map_pos()
-
-        board_state[snake_pos[0], snake_pos[1]] = SNAKE
+        board_state[snake_pos[1]][snake_pos[0]] = SNAKE
     
     food_pos = food.get_map_pos()
 
-    board_state[food_pos[0], food_pos[1]] = FOOD
+    board_state[food_pos[1]][food_pos[0]] = FOOD
 
     return board_state
 
@@ -1074,7 +1072,7 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
             #clock.tick(60) # Keeps game running at 60 fps -- otherwise timing is way off
 
             # Set the old state as the current state for access next loop
-            state_old = agent.get_state(board_state)
+            state_old = agent.get_state(None, snake, board_state, food)
 
             pygame.event.pump() # Prevents window from becoming unresponsive
             
@@ -1083,12 +1081,25 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
             final_move = agent.get_action(state_old) # Get the AI's move based on its state
 
             # Set the current direction based on this move
-            current_direction = NORTH
+            #changed to make the snake actually move and not go the same direction 
+            clockwise = [NORTH, EAST, SOUTH, WEST]
+            idx = clockwise.index(snake[0].get_direction())
+
+            #right turn 
+            if final_move[1] == 1: 
+                current_direction = clockwise[(idx + 1)%4]
+            elif final_move[2] == 1: 
+                current_direction = clockwise[(idx - 1)%4]
+            else: 
+                current_direction = snake[0].get_direction() 
 
             time_to_eat = food.get_time_since_eaten()
 
             # Updates the snake's current condition
             alive, tick, score, _ = update_snake(snake, food, tick, current_direction, tiles, alive, score, None)
+
+            #get new board state after it has moved 
+            board_state = get_board_state(tiles, snake, food)
 
             time_since_eaten = food.get_time_since_eaten()
 
@@ -1103,7 +1114,7 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
             if not alive:
                 reward = -10000 # Dying should always be an overriding punishment
             
-            state_new = agent.get_state(board_state) # Get the new state after moving and score update
+            state_new = agent.get_state(None, snake, board_state, food) # Get the new state after moving and score update
 
             agent.train_short_memory(state_old, final_move, reward, state_new, alive) # train the short term memory based on what happened this turn
 
@@ -1112,6 +1123,7 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
             draw_background(scale, screen, sprites, score, alive, False, False)
 
             draw_snake(scale, screen, sprites, snake, food)
+            draw_food(scale, screen, sprites, food)
 
             # This version does not bother drawing the death animation when dying, so snake will intersect with the wall
             # briefly before dying in this version.

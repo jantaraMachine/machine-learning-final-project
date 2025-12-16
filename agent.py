@@ -48,25 +48,36 @@ class Agent:
         dir_u = direction == 0 
         dir_d = direction == 2
 
+        #help to check if position is bad 
+        def is_danger(point):
+            x, y = point 
+            #check if out of bounds 
+            if x < 0 or x >= len(board_state[0]) or y < 0 or y >= len(board_state):
+                return True
+            
+            #check if snake or bush 
+            return board_state[y][x] == SNAKE or board_state[y][x] == BUSH
+
         #collision if board_state[x][y] returns 1 or 20 
         state = [
-            # danger straight 
-            (dir_r and (board_state[point_r[1]][point_r[0]] == SNAKE or board_state[point_r[1]][point_r[0]] == BUSH)) or  
-            (dir_l and (board_state[point_l[1]][point_l[0]] == SNAKE or board_state[point_l[1]][point_l[0]] == BUSH)) or
-            (dir_u and (board_state[point_u[1]][point_u[0]] == SNAKE or board_state[point_u[1]][point_u[0]] == BUSH)) or
-            (dir_d and (board_state[point_d[1]][point_d[0]] == SNAKE or board_state[point_d[1]][point_d[0]] == BUSH)),
+            #danger straight 
+            (dir_r and is_danger(point_r)) or 
+            (dir_l and is_danger(point_l)) or 
+            (dir_u and is_danger(point_u)) or 
+            (dir_d and is_danger(point_d)), 
 
-            # danger right 
-            (dir_u and (board_state[point_r[1]][point_r[0]] == SNAKE or board_state[point_r[1]][point_r[0]] == BUSH)) or 
-            (dir_d and (board_state[point_l[1]][point_l[0]] == SNAKE or board_state[point_l[1]][point_l[0]] == BUSH)) or 
-            (dir_l and (board_state[point_u[1]][point_u[0]] == SNAKE or board_state[point_u[1]][point_u[0]] == BUSH)) or 
-            (dir_r and (board_state[point_d[1]][point_d[0]] == SNAKE or board_state[point_d[1]][point_d[0]] == BUSH)),
+            #danger right 
+            (dir_u and is_danger(point_r)) or 
+            (dir_d and is_danger(point_l)) or 
+            (dir_l and is_danger(point_u)) or 
+            (dir_r and is_danger(point_d)),
 
-            # danger left 
-            (dir_d and (board_state[point_r[1]][point_r[0]] == SNAKE or board_state[point_r[1]][point_r[0]] == BUSH)) or 
-            (dir_u and (board_state[point_l[1]][point_l[0]] == SNAKE or board_state[point_l[1]][point_l[0]] == BUSH)) or 
-            (dir_r and (board_state[point_u[1]][point_u[0]] == SNAKE or board_state[point_u[1]][point_u[0]] == BUSH)) or 
-            (dir_l and (board_state[point_d[1]][point_d[0]] == SNAKE or board_state[point_d[1]][point_d[0]] == BUSH)),
+            #danger left 
+            (dir_d and is_danger(point_r)) or 
+            (dir_u and is_danger(point_l)) or 
+            (dir_r and is_danger(point_u)) or 
+            (dir_l and is_danger(point_d)),
+
 
             #move direction 
             dir_l, 
@@ -96,6 +107,10 @@ class Agent:
     def train_long_memory(self):
         #take variables from memory 
         #checking if we already have 1000 samples 
+        ##add check to see if there is stuff to train long memory 
+        if len(self.memory) == 0: 
+            return 
+
         if len(self.memory) > BATCH_SIZE:
             mini_sample = random.sample(self.memory, BATCH_SIZE) #returns list of tuples 
         else: 
@@ -112,7 +127,7 @@ class Agent:
     def train_short_memory(self, state, action, reward, next_state, done):
         self.trainer.train_step(state, action, reward, next_state, done) 
 
-    def get_action(self):
+    def get_action(self, state):
         # we want to do some random moves, the better our model gets = less random moves 
 
         # the more games the smaller the epsilon gets then we dont use random move 
