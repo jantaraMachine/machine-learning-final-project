@@ -18,6 +18,7 @@ class DQN(nn.Module):
         self.layer3 = nn.Linear(128, 3)
 
         if str(state_dict) != "0":
+            
             self.load_state_dict(state_dict)
 
     def forward(self, x):
