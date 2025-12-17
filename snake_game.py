@@ -1004,7 +1004,7 @@ def player_mode(scale):
     # Quits if running = False
     pygame.quit()
 
-def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
+def ai_mode(scale, epochs, num_subtract, punish_time, death_time, base):
 
     # Initializing variables -----------------------------------
     width = 272 * scale
@@ -1048,7 +1048,8 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
 
     # Initialize high score metric
     record = 0
-
+    
+    agent = Agent(base)
     # ----------------------------------------------------------
 
     for i in range(epochs):
@@ -1067,7 +1068,7 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
 
         total_score = 0
         
-        agent = Agent()
+        
 
         rewardSum = 0
     
@@ -1162,6 +1163,8 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
     
     print("High score: " + str(record))
 
+    agent.model.save()
+
     pygame.quit()
 
 def plot(scores, mean_scores):
@@ -1192,8 +1195,18 @@ def plot2(scores, mean_scores):
     Y = [x+1 for x in range(len(scores))]
 
     plt.ion()
-    graph = plt.plot(Y, scores)[0]
+    fig, ax = plt.subplots(nrows=2, ncols=1)
 
+    ax[0].plot(Y, scores)
+    ax[0].set_title('learning scores')
+
+    ax[1].plot(Y, mean_scores)
+    ax[1].set_title('mean learning scores')
+
+    #graph = plt.plot(Y, scores)[0]
+
+    #graph.set_ydata(Y)
+    plt.tight_layout()
     graph.set_ydata(scores)
     plt.draw()
     plt.pause(0.01)
@@ -1212,6 +1225,7 @@ def main():
     num_subtract = None
     punish_time = None
     death_time = None
+    base = None
 
     num_args = len(argv)
 
@@ -1224,6 +1238,7 @@ def main():
             num_subtract = argv[3]
             punish_time = argv[4]
             death_time = argv[5]
+            base = argv[6]
 
             try:
                 epochs = int(epochs)
@@ -1252,7 +1267,7 @@ def main():
     if num_args < 6:
         player_mode(scale)
     else:
-        ai_mode(scale, epochs, num_subtract, punish_time, death_time)
+        ai_mode(scale, epochs, num_subtract, punish_time, death_time, base)
 
 if __name__ == "__main__":
     main()

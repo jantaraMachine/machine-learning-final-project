@@ -17,13 +17,13 @@ BATCH_SIZE = 1000
 LR = 0.01 # Learning Rate
 
 class Agent:
-    def __init__(self):
+    def __init__(self, base):
         self.n_games = 0
         self.epsilon = 0 # Epsilon value which controls randomness in action selection
         self.gamma = 0.9 # Gamma value which controls the importance which the model places on weighting certain outcomes in the near future versus possible outcomes in the far future
         self.memory = deque(maxlen=MAX_MEMORY)
         #create instance of model/trainer
-        self.model = DQN(11)
+        self.model = DQN(11, base)
         self.trainer = QTrainer(self.model, lr = LR, gamma=self.gamma) 
 
     
