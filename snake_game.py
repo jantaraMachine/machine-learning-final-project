@@ -1154,11 +1154,11 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
             record = score
             # agent.model.save()
         
-        plot_scores.append(score)
-        total_score += score 
+        plot_scores.append(rewardSum)
+        total_score = sum(plot_scores)
         mean_score = total_score / agent.n_games
         plot_mean_scores.append(mean_score)
-        plot(plot_scores, plot_mean_scores) 
+        plot2(plot_scores, plot_mean_scores) 
     
     print("High score: " + str(record))
 
@@ -1172,14 +1172,34 @@ def plot(scores, mean_scores):
     plt.style.use('_mpl-gallery')
 
     #allows us to plot and see results 
+    plt.subplot()
     plt.clf() 
     plt.title('Training Progress')
     plt.xlabel('Game Number')
-    plt.ylabel('Score')
+    plt.ylabel('Reward Score')
     plt.plot(scores, label='Score')
     plt.plot(mean_scores, label = 'Average Score')
     plt.legend() 
     plt.pause(0.1)
+
+    plt.draw()
+
+
+# Derived from https://stackoverflow.com/questions/16446443/live-updating-with-matplotlib
+def plot2(scores, mean_scores):
+
+    # Create list with numbers for the game
+    Y = [x+1 for x in range(len(Y))]
+
+    plt.ion()
+    graph = plt.plot(scores, Y)[0]
+
+    graph.set_ydata(Y)
+    plt.draw()
+
+
+
+
 
 # Main function
 def main():
