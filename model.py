@@ -10,12 +10,15 @@ import os
 
 class DQN(nn.Module):
 
-    def __init__(self, n_observations):
+    def __init__(self, n_observations, state_dict=0):
         ## call super initalizer 
         super(DQN, self).__init__()
         self.layer1 = nn.Linear(n_observations, 128)
         self.layer2 = nn.Linear(128, 128)
         self.layer3 = nn.Linear(128, 3)
+
+        if state_dict != 0:
+            self.load_state_dict(state_dict)
 
     def forward(self, x):
         x = F.relu(self.layer1(x))
