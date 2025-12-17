@@ -1195,19 +1195,21 @@ def plot2(scores, mean_scores):
     Y = [x+1 for x in range(len(scores))]
 
     plt.ion()
-    fig, ax = plt.subplots(nrows=2, ncols=1)
+    #fig, ax = plt.subplots(nrows=2, ncols=1)
 
-    ax[0].plot(Y, scores)
-    ax[0].set_title('learning scores')
+    #ax[0].plot(Y, scores)
+    #ax[0].set_title('learning scores')
 
-    ax[1].plot(Y, mean_scores)
-    ax[1].set_title('mean learning scores')
+    #ax[1].plot(Y, mean_scores)
+    #ax[1].set_title('mean learning scores')
 
-    #graph = plt.plot(Y, scores)[0]
+    graph = plt.plot(Y, scores)[0]
+    graph2 = plt.plot(Y, mean_scores)[0]
 
-    #graph.set_ydata(Y)
-    plt.tight_layout()
+
+    #plt.tight_layout()
     graph.set_ydata(scores)
+    graph2.set_ydata(mean_scores)
     plt.draw()
     plt.pause(0.01)
 
@@ -1233,7 +1235,7 @@ def main():
 
         scale = argv[1]
 
-        if num_args == 6:
+        if num_args == 7:
             epochs = argv[2]
             num_subtract = argv[3]
             punish_time = argv[4]
@@ -1264,7 +1266,7 @@ def main():
     else:
         scale = 3
 
-    if num_args < 6:
+    if num_args < 7:
         player_mode(scale)
     else:
         ai_mode(scale, epochs, num_subtract, punish_time, death_time, base)
