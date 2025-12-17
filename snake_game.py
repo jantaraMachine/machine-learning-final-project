@@ -1052,7 +1052,9 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
 
     # ----------------------------------------------------------
 
-    for _ in range(epochs):
+    for i in range(epochs):
+
+        print(f"Epoch: {i}")
 
         snake, _, food = init()
 
@@ -1067,6 +1069,8 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
         total_score = 0
         
         agent = Agent()
+
+        rewardSum = 0
     
 
         while(alive):
@@ -1124,7 +1128,7 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
 
             agent.train_short_memory(state_old, final_move, reward, state_new, alive) # train the short term memory based on what happened this turn
 
-            
+            rewardSum += reward
 
             draw_background(scale, screen, sprites, score, alive, False, False)
 
@@ -1136,6 +1140,9 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
 
             pygame.display.flip()
         
+        # Once the epoch is over, print the rewardsum
+        print("rewardSum: " + str(rewardSum))
+
         # What are we doing with learning_score? Might be obsolete
         learning_score += score
 
