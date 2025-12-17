@@ -198,17 +198,6 @@ class Agent:
                 #TODO plot 
                 # plot the results from training, number of games and score in snake game when run 
 
-def plot(scores, mean_scores):
-    #allows us to plot and see results 
-    plt.clf() 
-    plt.title('Training Progress')
-    plt.xlabel('Game Number')
-    plt.ylabel('Score')
-    plt.plot(scores, label='Score')
-    plt.plot(mean_scores, label = 'Average Score')
-    plt.legend() 
-    plt.pause(0.1)
-
 
 
 if __name__ == '__main__': 

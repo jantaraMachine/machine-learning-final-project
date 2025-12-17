@@ -8,7 +8,6 @@ from food import Food
 
 from agent import Agent
 
-from agent import plot 
 import matplotlib.pyplot as plt 
 
 plt.ion()
@@ -1157,6 +1156,23 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
     print("High score: " + str(record))
 
     pygame.quit()
+
+def plot(scores, mean_scores):
+    '''
+    Function to display a live plot 
+    '''
+
+    plt.style.use('_mpl-gallery')
+
+    #allows us to plot and see results 
+    plt.clf() 
+    plt.title('Training Progress')
+    plt.xlabel('Game Number')
+    plt.ylabel('Score')
+    plt.plot(scores, label='Score')
+    plt.plot(mean_scores, label = 'Average Score')
+    plt.legend() 
+    plt.pause(0.1)
 
 # Main function
 def main():
