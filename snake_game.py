@@ -1163,6 +1163,8 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
     
     print("High score: " + str(record))
 
+    agent.model.save()
+
     pygame.quit()
 
 def plot(scores, mean_scores):
@@ -1193,9 +1195,18 @@ def plot2(scores, mean_scores):
     Y = [x+1 for x in range(len(scores))]
 
     plt.ion()
-    graph = plt.plot(Y, scores)[0]
+    fig, ax = plt.subplots(nrows=2, ncols=1)
 
-    graph.set_ydata(Y)
+    ax[0].plot(Y, scores)
+    ax[0].set_title('learning scores')
+
+    ax[1].plot(Y, mean_scores)
+    ax[1].set_title('mean learning scores')
+
+    #graph = plt.plot(Y, scores)[0]
+
+    #graph.set_ydata(Y)
+    plt.tight_layout()
     plt.draw()
     plt.pause(0.01)
 
