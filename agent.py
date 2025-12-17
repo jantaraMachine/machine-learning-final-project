@@ -94,7 +94,7 @@ class Agent:
         return np.array(state, dtype = int)
 
         ## Notes: 
-        #board_state returns the whole grid 
+        # board_state returns the whole grid 
         # board_state[x][y] this checks the x y position in a certain place on grid 
         # get points next to head of snake in all directions 
         # use Point(head.x - 16, head.y) to simulate the square to the left of the snakes head 

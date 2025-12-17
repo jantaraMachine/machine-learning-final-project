@@ -1040,7 +1040,15 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
         [BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH]
     ]
 
+    # Initialize clock
     clock = pygame.time.Clock()
+
+    # Initialize plots for scores
+    plot_scores = []
+    plot_mean_scores = []
+
+    # Initialize high score metric
+    record = 0
 
     # ----------------------------------------------------------
 
@@ -1056,10 +1064,8 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
 
         learning_score = 0
 
-        plot_scores = []
-        plot_mean_scores = []
         total_score = 0
-        record = 0
+        
         agent = Agent()
     
 
@@ -1130,12 +1136,14 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
 
             pygame.display.flip()
         
+        # What are we doing with learning_score? Might be obsolete
         learning_score += score
 
         # If dead, update long term memory
         agent.n_games += 1
         agent.train_long_memory()
 
+        # Update the high score if necessary
         if score > record:
             record = score
             # agent.model.save()
@@ -1146,6 +1154,8 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time):
         plot_mean_scores.append(mean_score)
         plot(plot_scores, plot_mean_scores) 
     
+    print("High score: " + str(record))
+
     pygame.quit()
 
 # Main function
