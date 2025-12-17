@@ -293,6 +293,7 @@ def update_snake(snake, food, tick, current_direction, tiles, alive, score, dead
                         
                     food.eat(snake) # Food will be teleported somewhere else
                     reward = 100
+                    score += 1
 
                     break
                 # If the head is in the same spot as a BUSH (aka the wall), kill the snake and quit the loop
@@ -1189,13 +1190,14 @@ def plot(scores, mean_scores):
 def plot2(scores, mean_scores):
 
     # Create list with numbers for the game
-    Y = [x+1 for x in range(len(Y))]
+    Y = [x+1 for x in range(len(scores))]
 
     plt.ion()
-    graph = plt.plot(scores, Y)[0]
+    graph = plt.plot(Y, scores)[0]
 
     graph.set_ydata(Y)
     plt.draw()
+    plt.pause(0.01)
 
 
 
