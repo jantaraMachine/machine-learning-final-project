@@ -19,7 +19,7 @@ class DQN(nn.Module):
 
         if str(state_dict) != "0":
             
-            self.load_state_dict(state_dict)
+            self.load_state_dict(torch.load(state_dict))
 
     def forward(self, x):
         x = F.relu(self.layer1(x))

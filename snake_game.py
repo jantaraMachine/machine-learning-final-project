@@ -1054,6 +1054,8 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time, base):
 
     for i in range(epochs):
 
+        count = 0
+
         print(f"Epoch: {i}")
 
         snake, _, food = init()
@@ -1154,6 +1156,12 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time, base):
         if score > record:
             record = score
             # agent.model.save()
+
+        count += 1
+
+        if count == 100:
+            agent.model.save()
+            count = 0
         
         plot_scores.append(rewardSum)
         total_score = sum(plot_scores)
