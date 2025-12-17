@@ -27,7 +27,7 @@ class DQN(nn.Module):
         return self.layer3(x)
     
     def save(self):
-        torch.save(self.state_dict(), "model.pth")
+        torch.save(self.state_dict(), "model.pt")
     
 class QTrainer:
     def __init__(self, model, lr, gamma):
