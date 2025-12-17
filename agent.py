@@ -108,8 +108,9 @@ class Agent:
     def train_long_memory(self):
         #take variables from memory 
         #checking if we already have 1000 samples 
+
         ##add check to see if there is stuff to train long memory 
-        if len(self.memory) < 100: 
+        if len(self.memory) == 0: 
             return 
 
         if len(self.memory) > BATCH_SIZE:
