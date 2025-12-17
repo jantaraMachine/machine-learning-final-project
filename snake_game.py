@@ -292,7 +292,6 @@ def update_snake(snake, food, tick, current_direction, tiles, alive, score, dead
                             snake.insert(1, Snake([head_map_pos[0] - 1, head_map_pos[1]], prev, BODY))
                         
                     food.eat(snake) # Food will be teleported somewhere else
-                    reward = 100
                     score += 1
 
                     break
@@ -314,10 +313,10 @@ def update_snake(snake, food, tick, current_direction, tiles, alive, score, dead
                 prev = segment.change_direction(prev)
                 segment.move()
         # Return whether the snake is alive or not and reset ticks to 0 (the snake has moved)
-        return alive, 0, reward, dead_head_direction
+        return alive, 0, score, dead_head_direction
     else:
         # Return that the snake is alive and add 1 tick (the snake has not moved)
-        return alive, tick + 1, reward, dead_head_direction
+        return alive, tick + 1, score, dead_head_direction
 
 def get_digit_sprite(digit):
 
@@ -1195,7 +1194,7 @@ def plot2(scores, mean_scores):
     plt.ion()
     graph = plt.plot(Y, scores)[0]
 
-    graph.set_ydata(Y)
+    graph.set_ydata(scores)
     plt.draw()
     plt.pause(0.01)
 
