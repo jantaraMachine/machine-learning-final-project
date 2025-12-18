@@ -245,8 +245,7 @@ def update_snake(snake, food, tick, current_direction, tiles, alive, score, dead
 
     # Moves and updates snake's segments' directions only after 12 ticks
     # (time units, can change ticks to make snake move faster or slower)
-    if tick == 12:
-
+    if tick == 0:
         food.tick()
 
         # Iterate through all snake's segments
@@ -1070,6 +1069,7 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time, base):
 
         total_score = 0
         
+        count = 0
         
 
         rewardSum = 0
@@ -1077,7 +1077,7 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time, base):
 
         while(alive):
 
-            reward = 1 # Set the default reward to be 1. This provides the snake a short and long term incentive to stay alive.
+            reward = 0 # Set the default reward to be 1. This provides the snake a short and long term incentive to stay alive.
 
             board_state = get_board_state(tiles, snake, food)
 
@@ -1116,11 +1116,13 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time, base):
             time_since_eaten = food.get_time_since_eaten()
 
             if time_since_eaten == 0: # If the snake ate the food this turn, give it a higher reward. This incentivises the snake to go for the food
-                reward = 100
+                print("0 time since eaten")
+                reward = 1000
             elif time_since_eaten == punish_time: # If the snake exceeds a certain number of hyperparametrized steps without eating the apple, punish the snake on this turn.
                 reward = -num_subtract
                 food.reset_time_since_eaten()
             elif time_since_eaten == death_time: # Straight up just kill the snake if it exceeds a certain hyperparametrized turn count without eating
+                print("Exceeded its welcome")
                 alive = False
 
             if not alive:
@@ -1128,7 +1130,11 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time, base):
             
             state_new = agent.get_state(None, snake, board_state, food) # Get the new state after moving and score update
 
-            agent.train_short_memory(state_old, final_move, reward, state_new, alive) # train the short term memory based on what happened this turn
+            if count == 100:
+                agent.train_short_memory(state_old, final_move, reward, state_new, alive) # train the short term memory based on what happened this turn
+                count = 0
+            else:
+                count += 1
 
             rewardSum += reward
 
@@ -1159,7 +1165,7 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time, base):
 
         count += 1
 
-        if count == 100:
+        if count == 40:
             agent.model.save()
             count = 0
         
