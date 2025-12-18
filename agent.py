@@ -136,7 +136,7 @@ class Agent:
         # we want to do some random moves, the better our model gets = less random moves 
 
         # the more games the smaller the epsilon gets then we dont use random move 
-        self.epsilon = 80 - 80 * (self.n_games/self.epochs)**2 # this doesn't have to be definitive just random val
+        self.epsilon = 80 - 80 * math.sqrt(self.n_games/self.epochs) # Epsilon decay function
         final_move = [0,0,0]
 
         if random.randint(0,200) < self.epsilon: 
