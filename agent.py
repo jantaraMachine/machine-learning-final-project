@@ -103,26 +103,28 @@ class Agent:
         # if we call the snake position we get the map positon and then we have to call the map function on it 
 
     def remember(self, state, action, reward, next_state, done):
-        self.memory.append((state, action, reward, next_state, done)) # we want to return one tuple 
+        self.memory.append((state, action, reward, next_state, done)) # we want to return one tuple
 
     def train_long_memory(self):
         #take variables from memory 
         #checking if we already have 1000 samples 
 
         ##add check to see if there is stuff to train long memory 
-        if len(self.memory) == 0: 
+        if len(self.memory) == 0:
+            print("memory empty")
             return 
 
         if len(self.memory) > BATCH_SIZE:
+            print("memory exceeds batch size")
             mini_sample = random.sample(self.memory, BATCH_SIZE) #returns list of tuples 
         else: 
             mini_sample = self.memory 
         
         #we want to put everything together and extracts it 
-        states, actions, rewards, next_states, dones = zip(*mini_sample)
+        states, actions, rewards, next_states, done = zip(*mini_sample)
 
         #we have a list of tuples now 
-        self.trainer.train_step(states, actions, rewards, next_states, dones)
+        self.trainer.train_step(states, actions, rewards, next_states, done)
         
 
 

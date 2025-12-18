@@ -1055,8 +1055,6 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time, base):
 
         count = 0
 
-        print(f"Epoch: {i}")
-
         snake, _, food = init()
 
         alive = True
@@ -1117,21 +1115,28 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time, base):
 
             if time_since_eaten == 0: # If the snake ate the food this turn, give it a higher reward. This incentivises the snake to go for the food
                 print("0 time since eaten")
-                reward = 1000
-            elif time_since_eaten == punish_time: # If the snake exceeds a certain number of hyperparametrized steps without eating the apple, punish the snake on this turn.
-                reward = -num_subtract
-                food.reset_time_since_eaten()
+                reward = 2000
+            
             elif time_since_eaten == death_time: # Straight up just kill the snake if it exceeds a certain hyperparametrized turn count without eating
                 print("Exceeded its welcome")
                 alive = False
 
             if not alive:
-                reward = -10000 # Dying should always be an overriding punishment
+                reward = -1000 # Dying should always be an overriding punishment
             
+            
+
             state_new = agent.get_state(None, snake, board_state, food) # Get the new state after moving and score update
 
-            if count == 100:
+            agent.remember(state_old, final_move, reward, state_new, not alive)
+
+            if count%500 == 0:
+                print("training short memory")
                 agent.train_short_memory(state_old, final_move, reward, state_new, alive) # train the short term memory based on what happened this turn
+                count += 1
+            elif count == 10000:
+                print("training long memory")
+                agent.train_long_memory()
                 count = 0
             else:
                 count += 1
@@ -1149,7 +1154,6 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time, base):
             pygame.display.flip()
         
         # Once the epoch is over, print the rewardsum
-        print("rewardSum: " + str(rewardSum))
 
         # What are we doing with learning_score? Might be obsolete
         learning_score += score
