@@ -17,14 +17,15 @@ BATCH_SIZE = 1000
 LR = 0.1 # Learning Rate
 
 class Agent:
-    def __init__(self, base):
+    def __init__(self, base, epochs):
         self.n_games = 0
         self.epsilon = 0 # Epsilon value which controls randomness in action selection
         self.gamma = 0.99 # Gamma value which controls the importance which the model places on weighting certain outcomes in the near future versus possible outcomes in the far future
         self.memory = deque(maxlen=MAX_MEMORY)
         #create instance of model/trainer
         self.model = DQN(11, base)
-        self.trainer = QTrainer(self.model, lr = LR, gamma=self.gamma) 
+        self.trainer = QTrainer(self.model, lr = LR, gamma=self.gamma)
+        self.epochs = epochs
 
     
     # For direction: NORTH = 0 | WEST = 1 | SOUTH = 2 | EAST = 3
@@ -135,7 +136,7 @@ class Agent:
         # we want to do some random moves, the better our model gets = less random moves 
 
         # the more games the smaller the epsilon gets then we dont use random move 
-        self.epsilon = 80 - math.sqrt(self.n_games) # this doesn't have to be definitive just random val
+        self.epsilon = 80 - 40 * (self.n_games/self.epochs)**2 # this doesn't have to be definitive just random val
         final_move = [0,0,0]
 
         if random.randint(0,200) < self.epsilon: 

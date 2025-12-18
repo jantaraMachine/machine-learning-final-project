@@ -1048,7 +1048,7 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time, base):
     # Initialize high score metric
     record = 0
     
-    agent = Agent(base)
+    agent = Agent(base, epochs)
     # ----------------------------------------------------------
 
     for i in range(epochs):
