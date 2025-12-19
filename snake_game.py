@@ -1115,7 +1115,7 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time, base):
 
             if time_since_eaten == 0: # If the snake ate the food this turn, give it a higher reward. This incentivises the snake to go for the food
                 print("0 time since eaten")
-                reward = 2000
+                reward = 4000
             
             elif time_since_eaten == death_time: # Straight up just kill the snake if it exceeds a certain hyperparametrized turn count without eating
                 print("Exceeded its welcome")
@@ -1185,6 +1185,143 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time, base):
 
     pygame.quit()
 
+def playback(scale, base):
+    # Initializing variables -----------------------------------
+    width = 272 * scale
+    height = 304 * scale
+
+    pygame.init()
+    screen = pygame.display.set_mode((width, height))
+    pygame.display.set_caption("Snake Game")
+
+    sprites = load_sprites(scale)
+
+    pygame.display.set_icon(sprites[ICON])
+
+    # Specifies what kind of tile each map tile is -- used for collision
+    tiles = [
+        [BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, GRASS, BUSH],
+        [BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH, BUSH]
+    ]
+
+    # Initialize clock
+    clock = pygame.time.Clock()
+    
+    agent = Agent(base, 1)
+    running = True
+    tick = 0
+    current_direction = None
+    clock = pygame.time.Clock()
+    did_death_animation = 0
+    score = 0
+    pause = False
+    dead_head_direction = None
+    won = False
+    # ----------------------------------------------------------
+
+    # Game loop
+    while running:
+        clock.tick(200) # Keeps game running at 60 fps -- otherwise timing is way off
+
+        # Finds keyboard input
+        for event in pygame.event.get():
+
+            # Sets running to false if player quits game
+            if event.type == pygame.QUIT:
+                running = False
+            # Else looks for directional input using arrow keys -- changes direction variable
+            # to that of corresponding arrow key
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    if not alive or won:
+                        alive = True
+                        snake, old_snake, food = init()
+                        did_death_animation = 0
+                        current_direction = NORTH
+                        won = False
+                        score = 0
+                    elif pause:
+                        pause = False
+                    else:
+                        pause = True
+        
+        board_state = get_board_state(tiles, snake, food)
+
+        #clock.tick(60) # Keeps game running at 60 fps -- otherwise timing is way off
+
+        # Set the old state as the current state for access next loop
+        state_old = agent.get_state(None, snake, board_state, food)
+
+        pygame.event.pump() # Prevents window from becoming unresponsive
+            
+        # TODO on getting AI's directional input -- setting current_direction to NORTH for now
+
+        final_move = agent.get_action(state_old) # Get the AI's move based on its state
+
+        # Set the current direction based on this move
+        #changed to make the snake actually move and not go the same direction 
+        clockwise = [NORTH, EAST, SOUTH, WEST]
+        idx = clockwise.index(snake[0].get_direction())
+
+        #right turn 
+        if final_move[1] == 1: 
+            current_direction = clockwise[(idx + 1)%4]
+        elif final_move[2] == 1: 
+            current_direction = clockwise[(idx - 1)%4]
+        else: 
+            current_direction = snake[0].get_direction() 
+
+        # Updates the snake's current condition + living status + tick count if alive
+        if alive and not pause and not won:
+            alive, tick, score, dead_head_direction = update_snake(snake, food, tick, current_direction, tiles, alive, score, dead_head_direction)
+
+        draw_background(scale, screen, sprites, score, alive, pause, won)
+
+        if score == 225:
+            won = True
+
+        if not won:
+            # Draws snake normally if alive
+            if alive:
+                draw_snake(scale, screen, sprites, snake, food)
+                if tick == 0: # Updates old_snake to be current snake after it moves
+                    old_snake = deepcopy(snake)
+            # Draws death animation if snake is dead
+            else:
+                
+                # dead_1 for 100 frames
+                if did_death_animation < 100:
+                    dead_1(scale, screen, sprites, old_snake, dead_head_direction)
+                    did_death_animation += 1
+                # dead_2 for remainder
+                else:
+                    dead_2(scale, screen, sprites, old_snake, dead_head_direction)
+            
+            draw_food(scale, screen, sprites, food)
+        else:
+            win(scale, screen, sprites, snake)
+
+        # Updates screen with drawn sprites
+        pygame.display.flip()
+
+    # Quits if running = False
+    pygame.quit()
+
 def plot(scores, mean_scores):
     '''
     Function to display a live plot 
@@ -1246,6 +1383,7 @@ def main():
     punish_time = None
     death_time = None
     base = None
+    mode = None
 
     num_args = len(argv)
 
@@ -1253,12 +1391,13 @@ def main():
 
         scale = argv[1]
 
-        if num_args == 7:
+        if num_args == 8:
             epochs = argv[2]
             num_subtract = argv[3]
             punish_time = argv[4]
             death_time = argv[5]
             base = argv[6]
+            mode = argv[7]
 
             try:
                 epochs = int(epochs)
@@ -1284,9 +1423,11 @@ def main():
     else:
         scale = 3
 
-    if num_args < 7:
+    if num_args < 8:
         player_mode(scale)
     else:
+        if mode == "P":
+            playback(scale, base)
         ai_mode(scale, epochs, num_subtract, punish_time, death_time, base)
 
 if __name__ == "__main__":

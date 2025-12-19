@@ -23,7 +23,7 @@ class Agent:
         self.gamma = 0.99 # Gamma value which controls the importance which the model places on weighting certain outcomes in the near future versus possible outcomes in the far future
         self.memory = deque(maxlen=MAX_MEMORY)
         #create instance of model/trainer
-        self.model = DQN(11, base)
+        self.model = DQN(15, base)
         self.trainer = QTrainer(self.model, lr = LR, gamma=self.gamma)
         self.epochs = epochs
 
@@ -37,10 +37,34 @@ class Agent:
 
         #get head location of snake 
         head = snake[0].get_map_pos() # this returns the (x,y) position of snake
-        head_x, head_y = head 
+        head_x, head_y = head
+        l_length = 0
+        for i in range(len(board_state[0])):
+            tile = board_state[head_x - i][head_y]
+            if tile == SNAKE or tile == BUSH:
+                break
+            l_length += 1
         point_l = (head_x-1, head_y)
+        r_length = 0
+        for i in range(len(board_state[0])):
+            tile = board_state[head_x + i][head_y]
+            if tile == SNAKE or tile == BUSH:
+                break
+            r_length += 1
         point_r = (head_x + 1, head_y)
+        u_length = 0
+        for i in range(len(board_state[0])):
+            tile = board_state[head_x][head_y - i]
+            if tile == SNAKE or tile == BUSH:
+                break
+            u_length += 1
         point_u = (head_x, head_y - 1)
+        d_length = 0
+        for i in range(len(board_state[0])):
+            tile = board_state[head_x][head_y + i]
+            if tile == SNAKE or tile == BUSH:
+                break
+            d_length += 1
         point_d = (head_x, head_y + 1)
 
         #get direction of snake 
@@ -79,6 +103,10 @@ class Agent:
             (dir_u and is_danger(point_l)) or 
             (dir_r and is_danger(point_u)) or 
             (dir_l and is_danger(point_d)),
+            l_length,
+            r_length,
+            u_length,
+            d_length,
 
 
             #move direction 
@@ -136,7 +164,8 @@ class Agent:
         # we want to do some random moves, the better our model gets = less random moves 
 
         # the more games the smaller the epsilon gets then we dont use random move 
-        self.epsilon = 80 - 80 * math.sqrt(self.n_games/self.epochs) # Epsilon decay function
+        #self.epsilon = 80 - 80 * math.sqrt(self.n_games/self.epochs) # Epsilon decay function
+        self.epsilon = 120 - self.n_games
         final_move = [0,0,0]
 
         if random.randint(0,200) < self.epsilon: 
