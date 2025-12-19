@@ -239,13 +239,13 @@ def init():
             return snake, old_snake, Food(food_pos)
 
 # Updates the snake's and food's position depending on several factors
-def update_snake(snake, food, tick, current_direction, tiles, alive, score, dead_head_direction):
+def update_snake(snake, food, tick, current_direction, tiles, alive, score, dead_head_direction, tick_rate):
 
     reward = 0
 
     # Moves and updates snake's segments' directions only after 12 ticks
     # (time units, can change ticks to make snake move faster or slower)
-    if tick == 0:
+    if tick == tick_rate:
         food.tick()
 
         # Iterate through all snake's segments
@@ -969,7 +969,7 @@ def player_mode(scale):
                         pause = True
         # Updates the snake's current condition + living status + tick count if alive
         if alive and not pause and not won:
-            alive, tick, score, dead_head_direction = update_snake(snake, food, tick, current_direction, tiles, alive, score, dead_head_direction)
+            alive, tick, score, dead_head_direction = update_snake(snake, food, tick, current_direction, tiles, alive, score, dead_head_direction, 12)
 
         draw_background(scale, screen, sprites, score, alive, pause, won)
 
@@ -1106,7 +1106,7 @@ def ai_mode(scale, epochs, num_subtract, punish_time, death_time, base):
             time_to_eat = food.get_time_since_eaten()
 
             # Updates the snake's current condition
-            alive, tick, score, _ = update_snake(snake, food, tick, current_direction, tiles, alive, score, None)
+            alive, tick, score, _ = update_snake(snake, food, tick, current_direction, tiles, alive, score, None, 0)
 
             #get new board state after it has moved 
             board_state = get_board_state(tiles, snake, food)
@@ -1220,7 +1220,8 @@ def playback(scale, base):
     ]
 
     # Initialize clock
-    clock = pygame.time.Clock()
+
+    snake, old_snake, food = init()
     
     agent = Agent(base, 1)
     running = True
@@ -1232,11 +1233,17 @@ def playback(scale, base):
     pause = False
     dead_head_direction = None
     won = False
+    alive = True
+
+    board_state = get_board_state(tiles, snake, food)
+    state_old = agent.get_state(None, snake, board_state, food)
+
+    final_move = agent.get_action(state_old) # Get the AI's move based on its state
     # ----------------------------------------------------------
 
     # Game loop
     while running:
-        clock.tick(200) # Keeps game running at 60 fps -- otherwise timing is way off
+        clock.tick(60) # Keeps game running at 60 fps -- otherwise timing is way off
 
         # Finds keyboard input
         for event in pygame.event.get():
@@ -1259,19 +1266,20 @@ def playback(scale, base):
                         pause = False
                     else:
                         pause = True
-        
-        board_state = get_board_state(tiles, snake, food)
+
+        pygame.event.pump() # Prevents window from becoming unresponsive
+        if tick == 12:
+            board_state = get_board_state(tiles, snake, food)
 
         #clock.tick(60) # Keeps game running at 60 fps -- otherwise timing is way off
 
         # Set the old state as the current state for access next loop
-        state_old = agent.get_state(None, snake, board_state, food)
+            state_old = agent.get_state(None, snake, board_state, food)
 
-        pygame.event.pump() # Prevents window from becoming unresponsive
             
-        # TODO on getting AI's directional input -- setting current_direction to NORTH for now
+            # TODO on getting AI's directional input -- setting current_direction to NORTH for now
 
-        final_move = agent.get_action(state_old) # Get the AI's move based on its state
+            final_move = agent.get_action(state_old) # Get the AI's move based on its state
 
         # Set the current direction based on this move
         #changed to make the snake actually move and not go the same direction 
@@ -1288,7 +1296,7 @@ def playback(scale, base):
 
         # Updates the snake's current condition + living status + tick count if alive
         if alive and not pause and not won:
-            alive, tick, score, dead_head_direction = update_snake(snake, food, tick, current_direction, tiles, alive, score, dead_head_direction)
+            alive, tick, score, dead_head_direction = update_snake(snake, food, tick, current_direction, tiles, alive, score, dead_head_direction, 12)
 
         draw_background(scale, screen, sprites, score, alive, pause, won)
 
@@ -1368,10 +1376,6 @@ def plot2(scores, mean_scores):
     plt.draw()
     plt.pause(0.01)
 
-
-
-
-
 # Main function
 def main():
 
@@ -1428,7 +1432,8 @@ def main():
     else:
         if mode == "P":
             playback(scale, base)
-        ai_mode(scale, epochs, num_subtract, punish_time, death_time, base)
+        else:
+            ai_mode(scale, epochs, num_subtract, punish_time, death_time, base)
 
 if __name__ == "__main__":
     main()
